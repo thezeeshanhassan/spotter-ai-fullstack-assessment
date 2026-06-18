@@ -57,10 +57,19 @@ def route(coords: list[tuple[float, float]]) -> dict:
     if not features:
         raise ORSError("No route returned")
     feat = features[0]
-    summary = feat["properties"]["summary"]
+    props = feat["properties"]
+    summary = props["summary"]
     geometry = [[lat, lng] for (lng, lat) in feat["geometry"]["coordinates"]]
+    legs = [
+        {
+            "distance_miles": seg["distance"] / METERS_PER_MILE,
+            "duration_hours": seg["duration"] / SECONDS_PER_HOUR,
+        }
+        for seg in props.get("segments", [])
+    ]
     return {
         "distance_miles": summary["distance"] / METERS_PER_MILE,
         "duration_hours": summary["duration"] / SECONDS_PER_HOUR,
         "geometry": geometry,
+        "legs": legs,
     }
