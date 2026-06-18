@@ -1,6 +1,7 @@
 import { Loader2, MapPin, Navigation, PackageCheck, Timer } from "lucide-react";
 import * as React from "react";
 
+import { CityAutocomplete } from "@/components/CityAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,12 +54,12 @@ export function TripForm({ onSubmit, loading }: TripFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Field id="current" label="Current location" icon={ICONS.current}
-            value={current} onChange={setCurrent} placeholder="e.g. Chicago, IL" />
-          <Field id="pickup" label="Pickup location" icon={ICONS.pickup}
-            value={pickup} onChange={setPickup} placeholder="e.g. Joliet, IL" />
-          <Field id="dropoff" label="Dropoff location" icon={ICONS.dropoff}
-            value={dropoff} onChange={setDropoff} placeholder="e.g. Des Moines, IA" />
+          <CityAutocomplete id="current" label="Current location" icon={ICONS.current}
+            value={current} onChange={setCurrent} placeholder="Search a city…" />
+          <CityAutocomplete id="pickup" label="Pickup location" icon={ICONS.pickup}
+            value={pickup} onChange={setPickup} placeholder="Search a city…" />
+          <CityAutocomplete id="dropoff" label="Dropoff location" icon={ICONS.dropoff}
+            value={dropoff} onChange={setDropoff} placeholder="Search a city…" />
           <Field id="cycle" label="Cycle used (hrs)" icon={ICONS.cycle}
             value={cycle} onChange={setCycle} type="number" placeholder="0" />
 
