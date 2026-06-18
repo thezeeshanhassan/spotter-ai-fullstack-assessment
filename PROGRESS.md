@@ -16,7 +16,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 6 | OpenRouteService client (geocode + route) | ✅ |
 | 7 | Trip models + migrations | ✅ |
 | 8 | Create-trip endpoint + serializers | ✅ |
-| 9 | Frontend scaffold + Tailwind + shadcn + API client | ⬜ |
+| 9 | Frontend scaffold + Tailwind + shadcn + API client | ✅ |
 | 10 | TripForm component | ⬜ |
 | 11 | EldLogSheet SVG component | ⬜ |
 | 12 | RouteMap (Leaflet) + animated playback | ⬜ |
@@ -66,5 +66,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `POST /api/trips/` geocodes the 3 locations, routes current→pickup→dropoff (ORS), derives `pickup_offset_miles` from leg 0, runs `build_timeline`, persists `Trip`+`Stop`s+`LogDay`s, returns full JSON (route, stops, days, violations). `GET /api/trips/<id>/` re-loads a saved trip. Stops without coords get interpolated along the geometry. Serializers: `TripInputSerializer` (validation, cycle 0–70), `TripSerializer`/`StopSerializer`/`LogDaySerializer`. Added `Trip.violations` JSON field (migration 0002). Also extended `ors.route` to return per-leg distances.
 **Test:** full suite → 14 passed (create 201 + round-trip GET, validation 400).
 **Remaining:** Tasks 9–14 (frontend + deploy). Next: frontend scaffold (Task 9).
+
+### Task 9 — Frontend scaffold + Tailwind + shadcn-style UI + API client ✅
+**Implemented:** Vite React+TS app in `frontend/`. Tailwind v3 (dark theme, glassmorphism tokens, indigo/cyan gradient bg), `@` path alias (vite + tsconfig), Vitest (jsdom + jest-dom setup). shadcn-style primitives hand-written (`ui/button|card|input|label`) using cva + tailwind-merge (avoids CLI interactivity). `lib/types.ts` mirrors API JSON; `lib/api.ts` `createTrip`/`getTrip` (base from `VITE_API_BASE_URL`). Deps: react-leaflet, leaflet, jspdf, html2canvas, lucide-react. `.env`/`.env.example`.
+**Test:** `vitest run src/lib/api.test.ts` → 2 passed.
+**Remaining:** Tasks 10–14. Next: TripForm component (Task 10).
 
 _(entries appended after each task)_
