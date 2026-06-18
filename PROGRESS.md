@@ -21,7 +21,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 11 | EldLogSheet SVG component | ✅ |
 | 12 | RouteMap (Leaflet) + animated playback | ✅ |
 | 13 | ViolationBanner + TripDashboard + PDF + dark polish | ✅ |
-| 14 | Deployment config (Render + Vercel) + README | ⬜ |
+| 14 | Deployment config (Render + Vercel) + README | ✅ |
 
 ---
 
@@ -92,4 +92,17 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Test:** full frontend suite `vitest run` → 7 passed. `npm run build` → succeeds (tsc + vite, PDF libs code-split).
 **Remaining:** Task 14 (deploy config + README). Next: Task 14.
 
-_(entries appended after each task)_
+### Task 14 — Deployment config + README ✅
+**Implemented:** `backend/build.sh` (pip + collectstatic + migrate), `render.yaml` blueprint (Python 3.12.13, gunicorn, env vars), `frontend/vercel.json` (SPA rewrite), prod `CSRF_TRUSTED_ORIGINS` from env. Full `README.md` (overview, stack, features, local setup, env tables, API, deploy steps, HOS notes — with TODO links for live demo + Loom). Verified `collectstatic` (163 files) and prod build.
+**Accuracy fix:** `split_into_days` now pads each day with off-duty so every DOT log totals 24h (partial first/last days included). Verified live LA→Phoenix→Dallas: 4 days all summing 24.0.
+**Test:** backend 14 passed, frontend 7 passed, `npm run build` ok, live end-to-end 201.
+
+---
+
+## ✅ All 14 tasks complete
+
+- **Backend:** 14 pytest passing — HOS engine (FMCSA rules) + ORS client + DRF API + SQLite.
+- **Frontend:** 7 vitest passing, production build clean — form, animated Leaflet map, SVG ELD logs, violations, PDF export, dark UI.
+- **Live pipeline** verified end-to-end with the real ORS key.
+
+**Remaining (manual, needs accounts):** deploy backend → Render, frontend → Vercel, fill the 3 TODO links in README, record the 3–5 min Loom, push to GitHub.
