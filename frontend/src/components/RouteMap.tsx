@@ -6,6 +6,7 @@ import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from "react-
 import "leaflet/dist/leaflet.css";
 
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/lib/theme";
 import type { Stop, TripResult } from "@/lib/types";
 
 const PLAYBACK_SECONDS = 14; // wall-clock seconds to animate the whole trip
@@ -64,6 +65,11 @@ function fmtClock(hours: number): string {
 }
 
 export function RouteMap({ result }: { result: TripResult }) {
+  const theme = useTheme();
+  const tileUrl =
+    theme === "dark"
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
   const geometry = result.route.geometry;
   const [progress, setProgress] = React.useState(0);
   const [playing, setPlaying] = React.useState(false);
@@ -106,10 +112,7 @@ export function RouteMap({ result }: { result: TripResult }) {
   return (
     <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-border">
       <MapContainer center={center as L.LatLngExpression} zoom={5} className="h-full w-full" scrollWheelZoom>
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        />
+        <TileLayer attribution="&copy; OpenStreetMap contributors &copy; CARTO" url={tileUrl} />
         <FitBounds geometry={geometry} />
         {geometry.length > 1 && (
           <Polyline positions={geometry as L.LatLngExpression[]} pathOptions={{ color: "#818cf8", weight: 4, opacity: 0.9 }} />
