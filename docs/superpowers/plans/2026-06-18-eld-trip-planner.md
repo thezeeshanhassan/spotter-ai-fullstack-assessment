@@ -278,8 +278,8 @@ git add backend/hos/engine.py backend/tests/test_hos_engine_singleday.py && git 
 - Test: `backend/tests/test_hos_engine_multiday.py`
 
 **Interfaces:**
-- Consumes: Task 3 `build_timeline`.
-- Produces: same signature; now inserts a `RESET_OFF_HOURS` (10h) `off_duty` segment whenever the 11h drive limit or 14h window is hit and more driving remains, resetting `drive_today`/`duty_window_start`/`drive_since_break`. Seeds cumulative on-duty from `cycle_used_hours`; if cumulative on-duty would exceed `CYCLE_LIMIT_HOURS`, append a `Violation(rule="70h_cycle", ...)`.
+- Consumes: Task 3 `build_timeline`. Add constant `RESTART_OFF_HOURS=34.0` to `rules.py`.
+- Produces: same signature; now inserts a `RESET_OFF_HOURS` (10h) `off_duty` segment whenever the 11h drive limit or 14h window is hit and more driving remains, resetting `drive_today`/`duty_window_start`/`drive_since_break`. Seeds cumulative on-duty from `cycle_used_hours`; when cumulative on-duty (seed + accrued) reaches `CYCLE_LIMIT_HOURS` and miles remain, insert a `RESTART_OFF_HOURS` (34h) `off_duty` "34-hour restart" segment, reset the cycle counter to 0, and append a `Violation(rule="70h_cycle", message=..., suggestion="Inserted 34-hour restart to legally continue")` as an informational note. The 34h restart also resets the 11h/14h clocks.
 
 - [ ] **Step 1: Write failing test**
 
@@ -300,12 +300,15 @@ def test_multiday_inserts_10h_reset():
     daily_drive_ok = True  # no single 24h window has >11h driving — checked in Task 5 day split
     assert daily_drive_ok
 
-def test_cycle_limit_violation():
+def test_cycle_limit_triggers_34h_restart():
+    # Seeded near the 70h cap with more driving to do -> a 34h restart must appear
     plan = build_timeline(
         total_miles=400, total_drive_hours=8.0, cycle_used_hours=69.0,
         start=datetime(2026,1,1,6,0), pickup_label="A", dropoff_label="B",
     )
     assert any(v.rule=="70h_cycle" for v in plan.violations)
+    restarts = [s for s in plan.segments if s.status=="off_duty" and s.duration_hours()>=rules.RESTART_OFF_HOURS]
+    assert len(restarts) >= 1
 
 def test_fuel_stop_every_1000_miles():
     plan = build_timeline(
@@ -322,7 +325,7 @@ Run: `cd backend && pytest tests/test_hos_engine_multiday.py -v` → FAIL.
 
 - [ ] **Step 3: Implement reset + cycle logic**
 
-Add to the drive loop: when `drive_today >= MAX_DRIVE_HOURS` or window elapsed `>= MAX_DUTY_WINDOW_HOURS` and miles remain, emit `off_duty` `RESET_OFF_HOURS` "10h reset", then zero `drive_today`, `drive_since_break`, set new `duty_window_start`. Track `cycle_used = cycle_used_hours + cumulative on_duty+driving`; if `> CYCLE_LIMIT_HOURS`, append violation once.
+Add to the drive loop: when `drive_today >= MAX_DRIVE_HOURS` or window elapsed `>= MAX_DUTY_WINDOW_HOURS` and miles remain, emit `off_duty` `RESET_OFF_HOURS` "10h reset", then zero `drive_today`, `drive_since_break`, set new `duty_window_start`. Track `cycle_used = cycle_used_hours + cumulative on_duty+driving`; when `cycle_used >= CYCLE_LIMIT_HOURS` and miles remain, emit `off_duty` `RESTART_OFF_HOURS` "34-hour restart", reset `cycle_used=0` and the 11h/14h clocks, and append the informational `Violation(rule="70h_cycle", ...)` once.
 
 - [ ] **Step 4: Run, verify pass**
 
