@@ -18,7 +18,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 8 | Create-trip endpoint + serializers | ✅ |
 | 9 | Frontend scaffold + Tailwind + shadcn + API client | ✅ |
 | 10 | TripForm component | ✅ |
-| 11 | EldLogSheet SVG component | ⬜ |
+| 11 | EldLogSheet SVG component | ✅ |
 | 12 | RouteMap (Leaflet) + animated playback | ⬜ |
 | 13 | ViolationBanner + TripDashboard + PDF + dark polish | ⬜ |
 | 14 | Deployment config (Render + Vercel) + README | ⬜ |
@@ -76,5 +76,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `components/TripForm.tsx` — glass card with 4 icon-labeled fields (current/pickup/dropoff/cycle), client validation (locations required, cycle 0–70), loading state with spinner, submits typed `TripInput`. Fixed vite alias to use `import.meta.url` (ESM `__dirname` was undefined) so `@/` resolves in Vitest. Renamed cycle label to avoid `/current/i` collision in tests.
 **Test:** `vitest run TripForm` → 2 passed.
 **Remaining:** Tasks 11–14. Next: EldLogSheet SVG (Task 11).
+
+### Task 11 — EldLogSheet SVG ✅
+**Implemented:** `components/EldLogSheet.tsx` — DOT-style daily log: 24 hour columns (Mid/Noon/major ticks) × 4 duty rows (Off/Sleeper/Driving/On-Duty), duty-status polyline plotted from segment times (UTC frac-hour → x, status → row), right-column per-status hour totals, remarks row with location ticks. One sheet per `DayLog`, day N of M header.
+**Test:** `vitest run EldLogSheet` → 1 passed (renders rows + polyline).
+**Remaining:** Tasks 12–14. Next: Leaflet RouteMap + animated playback (Task 12).
 
 _(entries appended after each task)_
