@@ -95,9 +95,9 @@ export function TripDashboard() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           1 · Route &amp; Stops
         </h2>
-        <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-          <div className="space-y-4">
-            <TripForm onSubmit={handleSubmit} loading={loading} />
+        <div className="grid items-stretch gap-6 lg:grid-cols-[360px_1fr]">
+          <div className="flex flex-col gap-4">
+            <TripForm onSubmit={handleSubmit} loading={loading} className="flex-1" />
             {error && (
               <Card>
                 <CardContent className="pt-5 text-sm text-destructive">{error}</CardContent>

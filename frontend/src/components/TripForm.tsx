@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Place, TripInput } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface TripFormProps {
   onSubmit: (input: TripInput) => void;
   loading: boolean;
+  className?: string;
 }
 
 const ICONS = {
@@ -20,7 +22,7 @@ const ICONS = {
   cycle: <Timer className="h-4 w-4 text-accent" />,
 };
 
-export function TripForm({ onSubmit, loading }: TripFormProps) {
+export function TripForm({ onSubmit, loading, className }: TripFormProps) {
   const [current, setCurrent] = React.useState("");
   const [pickup, setPickup] = React.useState("");
   const [dropoff, setDropoff] = React.useState("");
@@ -65,12 +67,12 @@ export function TripForm({ onSubmit, loading }: TripFormProps) {
   }
 
   return (
-    <Card>
+    <Card className={cn("flex flex-col", className)}>
       <CardHeader>
         <CardTitle>Plan a trip</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="flex flex-1 flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
           <CityAutocomplete id="current" label="Current location" icon={ICONS.current}
             value={current} onChange={setCurrent} onSelect={setCurrentPlace} placeholder="Search a city…" />
           <CityAutocomplete id="pickup" label="Pickup location" icon={ICONS.pickup}
@@ -82,7 +84,7 @@ export function TripForm({ onSubmit, loading }: TripFormProps) {
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          <Button type="submit" size="lg" className="mt-auto w-full" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" /> Planning…
