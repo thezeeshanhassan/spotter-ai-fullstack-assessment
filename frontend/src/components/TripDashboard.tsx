@@ -1,6 +1,7 @@
 import { Clock, Download, Gauge, Moon, Route, Sun, Truck } from "lucide-react";
 import * as React from "react";
 
+import { DayLogRow } from "@/components/DayLogRow";
 import { EldLogSheet } from "@/components/EldLogSheet";
 import { RouteMap } from "@/components/RouteMap";
 import { TripForm } from "@/components/TripForm";
@@ -120,14 +121,34 @@ export function TripDashboard() {
               <RouteMap result={result} />
 
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Daily Log Sheets</h2>
+                <h2 className="text-lg font-semibold">
+                  Daily Log Sheets <span className="text-sm font-normal text-muted-foreground">({result.days.length})</span>
+                </h2>
                 <Button variant="outline" size="sm" onClick={exportPdf} disabled={exporting}>
                   <Download className="h-4 w-4" />
                   {exporting ? "Exporting…" : "Export PDF"}
                 </Button>
               </div>
 
-              <div ref={logsRef} className="space-y-4">
+              {/* Interactive accordion — scales to many days */}
+              <div className="space-y-2.5">
+                {result.days.map((day, i) => (
+                  <DayLogRow
+                    key={i}
+                    day={day}
+                    dayNumber={i + 1}
+                    totalDays={result.days.length}
+                    defaultOpen={i === 0}
+                  />
+                ))}
+              </div>
+
+              {/* Off-screen full render used only for PDF export */}
+              <div
+                ref={logsRef}
+                aria-hidden
+                style={{ position: "absolute", left: -10000, top: 0, width: 840 }}
+              >
                 {result.days.map((day, i) => (
                   <EldLogSheet key={i} day={day} dayNumber={i + 1} totalDays={result.days.length} />
                 ))}

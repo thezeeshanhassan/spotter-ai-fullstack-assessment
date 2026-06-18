@@ -25,6 +25,6 @@ describe("TripDashboard", () => {
     fireEvent.change(screen.getByLabelText(/cycle/i), { target: { value: "0" } });
     fireEvent.click(screen.getByRole("button", { name: /plan/i }));
 
-    await waitFor(() => expect(screen.getByText(/2026-01-01/)).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText(/2026-01-01/).length).toBeGreaterThan(0));
   });
 });
