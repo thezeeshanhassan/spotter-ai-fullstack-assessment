@@ -17,7 +17,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 7 | Trip models + migrations | ✅ |
 | 8 | Create-trip endpoint + serializers | ✅ |
 | 9 | Frontend scaffold + Tailwind + shadcn + API client | ✅ |
-| 10 | TripForm component | ⬜ |
+| 10 | TripForm component | ✅ |
 | 11 | EldLogSheet SVG component | ⬜ |
 | 12 | RouteMap (Leaflet) + animated playback | ⬜ |
 | 13 | ViolationBanner + TripDashboard + PDF + dark polish | ⬜ |
@@ -71,5 +71,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** Vite React+TS app in `frontend/`. Tailwind v3 (dark theme, glassmorphism tokens, indigo/cyan gradient bg), `@` path alias (vite + tsconfig), Vitest (jsdom + jest-dom setup). shadcn-style primitives hand-written (`ui/button|card|input|label`) using cva + tailwind-merge (avoids CLI interactivity). `lib/types.ts` mirrors API JSON; `lib/api.ts` `createTrip`/`getTrip` (base from `VITE_API_BASE_URL`). Deps: react-leaflet, leaflet, jspdf, html2canvas, lucide-react. `.env`/`.env.example`.
 **Test:** `vitest run src/lib/api.test.ts` → 2 passed.
 **Remaining:** Tasks 10–14. Next: TripForm component (Task 10).
+
+### Task 10 — TripForm component ✅
+**Implemented:** `components/TripForm.tsx` — glass card with 4 icon-labeled fields (current/pickup/dropoff/cycle), client validation (locations required, cycle 0–70), loading state with spinner, submits typed `TripInput`. Fixed vite alias to use `import.meta.url` (ESM `__dirname` was undefined) so `@/` resolves in Vitest. Renamed cycle label to avoid `/current/i` collision in tests.
+**Test:** `vitest run TripForm` → 2 passed.
+**Remaining:** Tasks 11–14. Next: EldLogSheet SVG (Task 11).
 
 _(entries appended after each task)_
