@@ -4,12 +4,23 @@ from .models import LogDay, Stop, Trip
 
 
 class TripInputSerializer(serializers.Serializer):
-    """Validates the trip-planning request body."""
+    """Validates the trip-planning request body.
+
+    Coordinates are optional: when the user picks a place from the search
+    dropdown the frontend sends its lat/lng so we skip re-geocoding free text.
+    """
 
     current_location = serializers.CharField(max_length=255)
     pickup_location = serializers.CharField(max_length=255)
     dropoff_location = serializers.CharField(max_length=255)
     cycle_used_hrs = serializers.FloatField(min_value=0, max_value=70)
+
+    current_lat = serializers.FloatField(required=False, allow_null=True)
+    current_lng = serializers.FloatField(required=False, allow_null=True)
+    pickup_lat = serializers.FloatField(required=False, allow_null=True)
+    pickup_lng = serializers.FloatField(required=False, allow_null=True)
+    dropoff_lat = serializers.FloatField(required=False, allow_null=True)
+    dropoff_lng = serializers.FloatField(required=False, allow_null=True)
 
 
 class StopSerializer(serializers.ModelSerializer):
