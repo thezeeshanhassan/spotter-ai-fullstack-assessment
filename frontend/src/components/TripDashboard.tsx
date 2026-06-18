@@ -1,4 +1,4 @@
-import { Clock, Download, Gauge, Route, Truck } from "lucide-react";
+import { Clock, Download, Gauge, Moon, Route, Sun, Truck } from "lucide-react";
 import * as React from "react";
 
 import { EldLogSheet } from "@/components/EldLogSheet";
@@ -8,6 +8,7 @@ import { ViolationBanner } from "@/components/ViolationBanner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createTrip } from "@/lib/api";
+import { toggleTheme, useTheme } from "@/lib/theme";
 import type { TripInput, TripResult } from "@/lib/types";
 
 export function TripDashboard() {
@@ -16,6 +17,7 @@ export function TripDashboard() {
   const [error, setError] = React.useState("");
   const [exporting, setExporting] = React.useState(false);
   const logsRef = React.useRef<HTMLDivElement>(null);
+  const theme = useTheme();
 
   async function handleSubmit(input: TripInput) {
     setLoading(true);
@@ -38,7 +40,8 @@ export function TripDashboard() {
         import("jspdf"),
         import("html2canvas"),
       ]);
-      const canvas = await html2canvas(logsRef.current, { backgroundColor: "#0b1020", scale: 2 });
+      const bg = theme === "dark" ? "#0b1020" : "#ffffff";
+      const canvas = await html2canvas(logsRef.current, { backgroundColor: bg, scale: 2 });
       const img = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
@@ -72,6 +75,16 @@ export function TripDashboard() {
             Route, stops &amp; FMCSA-compliant daily log sheets
           </p>
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="ml-auto"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
