@@ -6,12 +6,57 @@ the driver's current cycle usage, applying FMCSA property-carrying rules.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 
 from . import rules
-from .types import Segment, Stop, TripPlan, Violation
+from .types import DayLog, Segment, Stop, TripPlan, Violation
 
 EPS = 1e-6
+
+
+def split_into_days(segments: list[Segment]) -> list[DayLog]:
+    """Split segments at midnight and group them into per-calendar-day DayLogs.
+
+    Any segment spanning midnight is cut into two so no segment crosses a day
+    boundary. Each DayLog carries per-status hour totals (which sum to ~24h for
+    a full interior day).
+    """
+    days: dict = {}
+    order: list = []
+
+    def bucket(seg: Segment) -> None:
+        key = seg.start.date()
+        if key not in days:
+            days[key] = DayLog(date=key, segments=[], totals={})
+            order.append(key)
+        days[key].segments.append(seg)
+
+    for seg in segments:
+        cur = seg
+        # Cut wherever the segment extends strictly past the next midnight. A
+        # segment ending exactly at midnight belongs wholly to its start day.
+        while True:
+            next_midnight = datetime.combine(
+                cur.start.date() + timedelta(days=1), time.min, tzinfo=cur.start.tzinfo
+            )
+            if cur.end <= next_midnight:
+                break
+            head = Segment(cur.status, cur.start, next_midnight, cur.location, cur.note)
+            bucket(head)
+            cur = Segment(cur.status, next_midnight, cur.end, cur.location, cur.note)
+        bucket(cur)
+
+    for key in order:
+        day = days[key]
+        totals: dict[str, float] = {
+            rules.OFF_DUTY: 0.0, rules.SLEEPER: 0.0,
+            rules.DRIVING: 0.0, rules.ON_DUTY: 0.0,
+        }
+        for seg in day.segments:
+            totals[seg.status] = totals.get(seg.status, 0.0) + seg.duration_hours()
+        day.totals = totals
+
+    return [days[key] for key in order]
 
 
 class _Builder:
@@ -157,4 +202,5 @@ def build_timeline(
     b.add(rules.ON_DUTY, rules.DROPOFF_HOURS, dropoff_label, "Dropoff")
     b.add_stop("dropoff", dropoff_label, round(total_miles, 1), drop_arr, b.dt)
 
-    return TripPlan(segments=b.segments, stops=b.stops, days=[], violations=violations)
+    days = split_into_days(b.segments)
+    return TripPlan(segments=b.segments, stops=b.stops, days=days, violations=violations)
