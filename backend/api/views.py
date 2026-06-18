@@ -18,6 +18,17 @@ def health(request):
     return Response({"status": "ok"})
 
 
+def _downsample(geometry, max_points=800):
+    """Thin a dense route geometry, always keeping the first and last points."""
+    n = len(geometry)
+    if n <= max_points:
+        return geometry
+    step = n / max_points
+    out = [geometry[int(i * step)] for i in range(max_points)]
+    out[-1] = geometry[-1]
+    return out
+
+
 def _interpolate(geometry, fraction):
     """Pick a [lat, lng] point at the given fraction along the geometry."""
     if not geometry:
@@ -43,6 +54,7 @@ def create_trip(request):
         (dropoff["lat"], dropoff["lng"]),
     ])
 
+    geometry = _downsample(routed["geometry"])
     legs = routed.get("legs") or []
     pickup_offset_miles = legs[0]["distance_miles"] if legs else 0.0
 
@@ -63,7 +75,7 @@ def create_trip(request):
         cycle_used_hrs=data["cycle_used_hrs"],
         total_miles=routed["distance_miles"],
         total_drive_hours=routed["duration_hours"],
-        route_geometry=routed["geometry"],
+        route_geometry=geometry,
         violations=[asdict(v) for v in plan.violations],
     )
 
@@ -71,7 +83,7 @@ def create_trip(request):
     for stop in plan.stops:
         lat, lng = stop.lat, stop.lng
         if lat is None:
-            lat, lng = _interpolate(routed["geometry"], stop.mile_marker / total_miles)
+            lat, lng = _interpolate(geometry, stop.mile_marker / total_miles)
         Stop.objects.create(
             trip=trip, type=stop.type, label=stop.label, mile_marker=stop.mile_marker,
             lat=lat, lng=lng, arrival=stop.arrival, departure=stop.departure,
