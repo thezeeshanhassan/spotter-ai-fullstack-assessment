@@ -1,7 +1,7 @@
 import { Clock, Download, Gauge, Moon, Route, Sun, Truck } from "lucide-react";
 import * as React from "react";
 
-import { DayLogRow } from "@/components/DayLogRow";
+import { DaySelector, type DaySelection } from "@/components/DaySelector";
 import { EldLogSheet } from "@/components/EldLogSheet";
 import { RouteMap } from "@/components/RouteMap";
 import { TripForm } from "@/components/TripForm";
@@ -17,6 +17,7 @@ export function TripDashboard() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [exporting, setExporting] = React.useState(false);
+  const [daySel, setDaySel] = React.useState<DaySelection>(0);
   const logsRef = React.useRef<HTMLDivElement>(null);
   const theme = useTheme();
 
@@ -26,6 +27,7 @@ export function TripDashboard() {
     try {
       const res = await createTrip(input);
       setResult(res);
+      setDaySel(0); // reset to the first day for a new trip
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to plan trip.");
     } finally {
@@ -88,75 +90,88 @@ export function TripDashboard() {
         </Button>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="space-y-4">
-          <TripForm onSubmit={handleSubmit} loading={loading} />
-          {error && (
-            <Card>
-              <CardContent className="pt-5 text-sm text-destructive">{error}</CardContent>
-            </Card>
-          )}
+      {/* SECTION 1 — Trip input + route map */}
+      <section className="mb-10">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          1 · Route &amp; Stops
+        </h2>
+        <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+          <div className="space-y-4">
+            <TripForm onSubmit={handleSubmit} loading={loading} />
+            {error && (
+              <Card>
+                <CardContent className="pt-5 text-sm text-destructive">{error}</CardContent>
+              </Card>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {result ? (
+              <>
+                <div className="grid grid-cols-3 gap-3">
+                  <Stat icon={<Gauge className="h-4 w-4" />} label="Distance" value={`${Math.round(result.route.distance_miles)} mi`} />
+                  <Stat icon={<Clock className="h-4 w-4" />} label="Drive time" value={`${result.route.duration_hours.toFixed(1)} h`} />
+                  <Stat icon={<Route className="h-4 w-4" />} label="Log days" value={`${result.days.length}`} />
+                </div>
+                <RouteMap result={result} />
+              </>
+            ) : (
+              <Card>
+                <CardContent className="flex h-[420px] flex-col items-center justify-center gap-3 text-center text-muted-foreground">
+                  <Route className="h-10 w-10 opacity-40" />
+                  <p>Enter trip details to see the route and daily logs.</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
+      </section>
 
-        <div className="space-y-6">
-          {!result && !loading && (
-            <Card>
-              <CardContent className="flex h-[420px] flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-                <Route className="h-10 w-10 opacity-40" />
-                <p>Enter trip details to see the route and daily logs.</p>
-              </CardContent>
-            </Card>
-          )}
+      {/* SECTION 2 — Daily logs */}
+      {result && (
+        <section>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              2 · Daily Logs <span className="normal-case text-foreground">({result.days.length} days)</span>
+            </h2>
+            <Button variant="outline" size="sm" onClick={exportPdf} disabled={exporting}>
+              <Download className="h-4 w-4" />
+              {exporting ? "Exporting…" : "Export PDF"}
+            </Button>
+          </div>
 
-          {result && (
-            <>
-              <div className="grid grid-cols-3 gap-3">
-                <Stat icon={<Gauge className="h-4 w-4" />} label="Distance" value={`${Math.round(result.route.distance_miles)} mi`} />
-                <Stat icon={<Clock className="h-4 w-4" />} label="Drive time" value={`${result.route.duration_hours.toFixed(1)} h`} />
-                <Stat icon={<Route className="h-4 w-4" />} label="Log days" value={`${result.days.length}`} />
-              </div>
+          <ViolationBanner violations={result.violations} />
 
-              <ViolationBanner violations={result.violations} />
+          <div className="mt-3">
+            <DaySelector days={result.days} selected={daySel} onSelect={setDaySel} />
+          </div>
 
-              <RouteMap result={result} />
-
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">
-                  Daily Log Sheets <span className="text-sm font-normal text-muted-foreground">({result.days.length})</span>
-                </h2>
-                <Button variant="outline" size="sm" onClick={exportPdf} disabled={exporting}>
-                  <Download className="h-4 w-4" />
-                  {exporting ? "Exporting…" : "Export PDF"}
-                </Button>
-              </div>
-
-              {/* Interactive accordion — scales to many days */}
-              <div className="space-y-2.5">
-                {result.days.map((day, i) => (
-                  <DayLogRow
-                    key={i}
-                    day={day}
-                    dayNumber={i + 1}
-                    totalDays={result.days.length}
-                    defaultOpen={i === 0}
-                  />
-                ))}
-              </div>
-
-              {/* Off-screen full render used only for PDF export */}
-              <div
-                ref={logsRef}
-                aria-hidden
-                style={{ position: "absolute", left: -10000, top: 0, width: 840 }}
-              >
-                {result.days.map((day, i) => (
+          <div className="mt-4 space-y-4">
+            {daySel === "all"
+              ? result.days.map((day, i) => (
                   <EldLogSheet key={i} day={day} dayNumber={i + 1} totalDays={result.days.length} />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+                ))
+              : (
+                <EldLogSheet
+                  day={result.days[daySel]}
+                  dayNumber={daySel + 1}
+                  totalDays={result.days.length}
+                />
+              )}
+          </div>
+
+          {/* Off-screen full render used only for PDF export (always all days) */}
+          <div
+            ref={logsRef}
+            aria-hidden
+            style={{ position: "absolute", left: -10000, top: 0, width: 840 }}
+          >
+            {result.days.map((day, i) => (
+              <EldLogSheet key={i} day={day} dayNumber={i + 1} totalDays={result.days.length} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
