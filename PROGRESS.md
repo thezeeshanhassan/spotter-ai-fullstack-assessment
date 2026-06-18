@@ -19,7 +19,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 9 | Frontend scaffold + Tailwind + shadcn + API client | ✅ |
 | 10 | TripForm component | ✅ |
 | 11 | EldLogSheet SVG component | ✅ |
-| 12 | RouteMap (Leaflet) + animated playback | ⬜ |
+| 12 | RouteMap (Leaflet) + animated playback | ✅ |
 | 13 | ViolationBanner + TripDashboard + PDF + dark polish | ⬜ |
 | 14 | Deployment config (Render + Vercel) + README | ⬜ |
 
@@ -81,5 +81,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `components/EldLogSheet.tsx` — DOT-style daily log: 24 hour columns (Mid/Noon/major ticks) × 4 duty rows (Off/Sleeper/Driving/On-Duty), duty-status polyline plotted from segment times (UTC frac-hour → x, status → row), right-column per-status hour totals, remarks row with location ticks. One sheet per `DayLog`, day N of M header.
 **Test:** `vitest run EldLogSheet` → 1 passed (renders rows + polyline).
 **Remaining:** Tasks 12–14. Next: Leaflet RouteMap + animated playback (Task 12).
+
+### Task 12 — RouteMap (Leaflet) + animated playback ✅
+**Implemented:** `components/RouteMap.tsx` — react-leaflet map (Carto dark tiles), route polyline, color-coded stop markers (pickup/dropoff/fuel/rest/break divIcons) with popups, auto-fit bounds. rAF truck (🚚) playback along geometry with play/pause, live driving-hours clock, miles counter, progress bar, and a legend. Whole trip animates over ~14s.
+**Test:** `vitest run RouteMap` (react-leaflet mocked) → 1 passed (polyline + play control).
+**Remaining:** Tasks 13–14. Next: ViolationBanner + TripDashboard + PDF + dark polish (Task 13).
 
 _(entries appended after each task)_
