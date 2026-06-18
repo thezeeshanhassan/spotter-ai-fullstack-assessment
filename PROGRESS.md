@@ -10,7 +10,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 |---|------|--------|
 | 1 | Backend scaffold + health endpoint | ✅ |
 | 2 | HOS types + rule constants | ✅ |
-| 3 | HOS engine — single-day (drive/break/fuel/pickup/dropoff) | ⬜ |
+| 3 | HOS engine — single-day (drive/break/fuel/pickup/dropoff) | ✅ |
 | 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ⬜ |
 | 5 | Split timeline into per-day log sheets | ⬜ |
 | 6 | OpenRouteService client (geocode + route) | ⬜ |
@@ -36,5 +36,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `backend/hos/` pure module (no Django). `rules.py` — all FMCSA constants (11h drive, 14h window, 8h→30min break, 10h reset, 70h cycle, 34h restart) + trip assumptions (1h pickup/dropoff, fuel/1000mi, 55mph fallback) + duty-status names. `types.py` — `Segment` (with `duration_hours()`), `Stop`, `DayLog`, `Violation`, `TripPlan` dataclasses.
 **Test:** `pytest tests/test_hos_types.py` → 1 passed.
 **Remaining:** Tasks 3–14. Next: HOS engine single-day path (Task 3).
+
+### Task 3 — HOS engine single-day ✅
+**Implemented:** `hos/engine.py` `build_timeline(...)`. Walks the trip with a `_Builder` cursor: pickup on-duty (1h) → driving broken into chunks bounded by next-break and next-fuel boundaries → dropoff on-duty (1h). Inserts a 30-min on-duty break after 8h cumulative driving and a fuel stop every 1,000 mi. Emits matching `Stop`s (pickup/fuel/break/dropoff). Multi-day resets/cycle deferred to Task 4 (single-day path leaves violations empty).
+**Test:** `pytest tests/test_hos_engine_singleday.py` → 2 passed.
+**Remaining:** Tasks 4–14. Next: multi-day resets + 70h cycle + 34h restart (Task 4).
 
 _(entries appended after each task)_
