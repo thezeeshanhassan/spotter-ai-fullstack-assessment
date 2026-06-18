@@ -14,7 +14,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ✅ |
 | 5 | Split timeline into per-day log sheets | ✅ |
 | 6 | OpenRouteService client (geocode + route) | ✅ |
-| 7 | Trip models + migrations | ⬜ |
+| 7 | Trip models + migrations | ✅ |
 | 8 | Create-trip endpoint + serializers | ⬜ |
 | 9 | Frontend scaffold + Tailwind + shadcn + API client | ⬜ |
 | 10 | TripForm component | ⬜ |
@@ -56,5 +56,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `api/services/ors.py` — `geocode(query)` → {label,lat,lng} (first feature) and `route(coords)` → {distance_miles, duration_hours, geometry:[[lat,lng]]} via driving-hgv GeoJSON. Key from `settings.ORS_API_KEY`, never client-exposed. `ORSError` on failures. ORS returns [lng,lat]; we flip to [lat,lng] for Leaflet.
 **Test:** mocked `pytest tests/test_ors.py` → 2 passed. Live smoke test with real key confirmed (Chicago→Des Moines 334mi/7.8h).
 **Remaining:** Tasks 7–14. Next: Trip/Stop/LogDay models + migrations (Task 7).
+
+### Task 7 — Trip/Stop/LogDay models + migrations ✅
+**Implemented:** `api/models.py` — `Trip` (locations, cycle_used_hrs, totals, route_geometry JSON, created_at), `Stop` (FK related_name=stops, type/label/mile_marker/lat/lng/arrival/departure), `LogDay` (FK related_name=days, date, segments JSON, totals JSON). Migration `0001_initial` generated + applied.
+**Test:** `pytest tests/test_models.py` → 1 passed.
+**Remaining:** Tasks 8–14. Next: create-trip endpoint + serializers (Task 8).
 
 _(entries appended after each task)_
