@@ -1,29 +1,50 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { TripForm } from "./TripForm";
+import * as api from "@/lib/api";
+
+// Each query returns one suggestion labelled after the query.
+beforeEach(() => {
+  vi.spyOn(api, "suggestPlaces").mockImplementation(async (q: string) => [
+    { label: `${q.trim()} City`, lat: 40, lng: -80 },
+  ]);
+});
+
+async function pick(labelRe: RegExp, text: string) {
+  fireEvent.change(screen.getByLabelText(labelRe), { target: { value: text } });
+  const option = await screen.findByText(`${text} City`);
+  fireEvent.click(option);
+}
 
 describe("TripForm", () => {
-  it("submits entered values", () => {
+  it("submits with picked places and their coordinates", async () => {
     const onSubmit = vi.fn();
     render(<TripForm onSubmit={onSubmit} loading={false} />);
-    fireEvent.change(screen.getByLabelText(/current/i), { target: { value: "Chicago" } });
-    fireEvent.change(screen.getByLabelText(/pickup/i), { target: { value: "Joliet" } });
-    fireEvent.change(screen.getByLabelText(/dropoff/i), { target: { value: "Des Moines" } });
+    await pick(/current/i, "Chicago");
+    await pick(/pickup/i, "Joliet");
+    await pick(/dropoff/i, "Des Moines");
     fireEvent.change(screen.getByLabelText(/cycle/i), { target: { value: "10" } });
     fireEvent.click(screen.getByRole("button", { name: /plan/i }));
-    expect(onSubmit).toHaveBeenCalledWith({
-      current_location: "Chicago",
-      pickup_location: "Joliet",
-      dropoff_location: "Des Moines",
-      cycle_used_hrs: 10,
-    });
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        current_location: "Chicago City",
+        pickup_location: "Joliet City",
+        dropoff_location: "Des Moines City",
+        cycle_used_hrs: 10,
+        current_lat: 40,
+        current_lng: -80,
+      }),
+    );
   });
 
-  it("does not submit when a field is empty", () => {
+  it("blocks submit when locations are not chosen from search", async () => {
     const onSubmit = vi.fn();
     render(<TripForm onSubmit={onSubmit} loading={false} />);
+    fireEvent.change(screen.getByLabelText(/current/i), { target: { value: "typed text" } });
     fireEvent.click(screen.getByRole("button", { name: /plan/i }));
     expect(onSubmit).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByText(/from the search suggestions/i)).toBeTruthy());
   });
 });

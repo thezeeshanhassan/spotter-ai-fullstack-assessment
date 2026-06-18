@@ -13,10 +13,12 @@ interface CityAutocompleteProps {
   icon: React.ReactNode;
   value: string;
   onChange: (value: string) => void;
+  /** Fires with the picked place, or null when the user edits the text freely. */
+  onSelect?: (place: Place | null) => void;
   placeholder?: string;
 }
 
-export function CityAutocomplete({ id, label, icon, value, onChange, placeholder }: CityAutocompleteProps) {
+export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, placeholder }: CityAutocompleteProps) {
   const [results, setResults] = React.useState<Place[]>([]);
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -62,6 +64,7 @@ export function CityAutocomplete({ id, label, icon, value, onChange, placeholder
   function select(place: Place) {
     justSelected.current = true;
     onChange(place.label);
+    onSelect?.(place);
     setOpen(false);
     setResults([]);
   }
@@ -94,7 +97,10 @@ export function CityAutocomplete({ id, label, icon, value, onChange, placeholder
           value={value}
           placeholder={placeholder}
           autoComplete="off"
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            onSelect?.(null); // typing invalidates any prior pick
+          }}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={onKeyDown}
         />

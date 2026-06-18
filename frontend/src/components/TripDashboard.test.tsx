@@ -6,8 +6,17 @@ import * as api from "@/lib/api";
 
 vi.mock("./RouteMap", () => ({ RouteMap: () => <div>map</div> }));
 
+async function pick(labelRe: RegExp, text: string) {
+  fireEvent.change(screen.getByLabelText(labelRe), { target: { value: text } });
+  const option = await screen.findByText(`${text} City`);
+  fireEvent.click(option);
+}
+
 describe("TripDashboard", () => {
   it("renders log sheets after planning a trip", async () => {
+    vi.spyOn(api, "suggestPlaces").mockImplementation(async (q: string) => [
+      { label: `${q.trim()} City`, lat: 40, lng: -80 },
+    ]);
     vi.spyOn(api, "createTrip").mockResolvedValue({
       id: 1,
       current_location: "A", pickup_location: "B", dropoff_location: "C", cycle_used_hrs: 0,
@@ -19,9 +28,9 @@ describe("TripDashboard", () => {
     });
 
     render(<TripDashboard />);
-    fireEvent.change(screen.getByLabelText(/current/i), { target: { value: "A" } });
-    fireEvent.change(screen.getByLabelText(/pickup/i), { target: { value: "B" } });
-    fireEvent.change(screen.getByLabelText(/dropoff/i), { target: { value: "C" } });
+    await pick(/current/i, "Aa");
+    await pick(/pickup/i, "Bb");
+    await pick(/dropoff/i, "Cc");
     fireEvent.change(screen.getByLabelText(/cycle/i), { target: { value: "0" } });
     fireEvent.click(screen.getByRole("button", { name: /plan/i }));
 

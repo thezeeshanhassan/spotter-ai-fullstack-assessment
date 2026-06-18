@@ -9,6 +9,12 @@ export interface TripInput {
   pickup_location: string;
   dropoff_location: string;
   cycle_used_hrs: number;
+  current_lat?: number | null;
+  current_lng?: number | null;
+  pickup_lat?: number | null;
+  pickup_lng?: number | null;
+  dropoff_lat?: number | null;
+  dropoff_lng?: number | null;
 }
 
 export type DutyStatus = "off_duty" | "sleeper" | "driving" | "on_duty";

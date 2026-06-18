@@ -43,6 +43,20 @@ def _downsample(geometry, max_points=800):
     return out
 
 
+def _friendly_error(msg: str) -> str:
+    """Turn a raw ORS error into a user-facing message."""
+    low = msg.lower()
+    if "6000000" in msg or "distance must not be greater" in low:
+        return ("This route is too long to plan (over ~3,700 miles / 6,000 km). "
+                "Pick locations that are closer together.")
+    if "routable point" in low or "404" in msg or "no route" in low:
+        return ("Couldn't find a road route between these locations. "
+                "Make sure each is a real place selected from the search, on the same landmass.")
+    if "geocode" in low or "no geocode" in low:
+        return "One of the locations couldn't be found. Pick a place from the search suggestions."
+    return "Could not plan this route. Please check the locations and try again."
+
+
 def _interpolate(geometry, fraction):
     """Pick a [lat, lng] point at the given fraction along the geometry."""
     if not geometry:
@@ -58,11 +72,18 @@ def create_trip(request):
     serializer.is_valid(raise_exception=True)
     data = serializer.validated_data
 
-    # Geocode the three locations, then route current -> pickup -> dropoff.
+    def resolve(prefix, label):
+        """Use the picked place's coords when present, else geocode the text."""
+        lat, lng = data.get(f"{prefix}_lat"), data.get(f"{prefix}_lng")
+        if lat is not None and lng is not None:
+            return {"label": label, "lat": lat, "lng": lng}
+        return ors.geocode(label)
+
+    # Resolve the three locations, then route current -> pickup -> dropoff.
     try:
-        current = ors.geocode(data["current_location"])
-        pickup = ors.geocode(data["pickup_location"])
-        dropoff = ors.geocode(data["dropoff_location"])
+        current = resolve("current", data["current_location"])
+        pickup = resolve("pickup", data["pickup_location"])
+        dropoff = resolve("dropoff", data["dropoff_location"])
         routed = ors.route([
             (current["lat"], current["lng"]),
             (pickup["lat"], pickup["lng"]),
@@ -70,11 +91,7 @@ def create_trip(request):
         ])
     except ORSError as exc:
         return Response(
-            {"detail": (
-                "Could not plan this route. Check the locations are valid and "
-                "connected by road (no cross-ocean routes). "
-                f"[{exc}]"
-            )},
+            {"detail": _friendly_error(str(exc))},
             status=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
 
