@@ -8,7 +8,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 
 | # | Task | Status |
 |---|------|--------|
-| 1 | Backend scaffold + health endpoint | ⬜ |
+| 1 | Backend scaffold + health endpoint | ✅ |
 | 2 | HOS types + rule constants | ⬜ |
 | 3 | HOS engine — single-day (drive/break/fuel/pickup/dropoff) | ⬜ |
 | 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ⬜ |
@@ -27,4 +27,9 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 
 ## Task Log
 
-_(entries appended after each task: what was implemented + what remains)_
+### Task 1 — Backend scaffold + health endpoint ✅
+**Implemented:** Django 5.2.1 project (`config`) + `api` app on Python 3.12 venv. Settings read from `.env` (secret key, debug, hosts, CORS, `ORS_API_KEY`). DRF + corsheaders + whitenoise wired. `GET /api/health/` → `{"status":"ok"}`. `pytest.ini` + passing `tests/test_health.py`. `.gitignore`, `.env` (gitignored, holds ORS key), `.env.example`.
+**Test:** `pytest tests/test_health.py` → 1 passed.
+**Remaining:** Tasks 2–14. Next: HOS types + rule constants (Task 2).
+
+_(entries appended after each task)_
