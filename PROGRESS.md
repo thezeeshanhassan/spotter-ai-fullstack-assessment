@@ -20,7 +20,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 10 | TripForm component | ✅ |
 | 11 | EldLogSheet SVG component | ✅ |
 | 12 | RouteMap (Leaflet) + animated playback | ✅ |
-| 13 | ViolationBanner + TripDashboard + PDF + dark polish | ⬜ |
+| 13 | ViolationBanner + TripDashboard + PDF + dark polish | ✅ |
 | 14 | Deployment config (Render + Vercel) + README | ⬜ |
 
 ---
@@ -86,5 +86,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `components/RouteMap.tsx` — react-leaflet map (Carto dark tiles), route polyline, color-coded stop markers (pickup/dropoff/fuel/rest/break divIcons) with popups, auto-fit bounds. rAF truck (🚚) playback along geometry with play/pause, live driving-hours clock, miles counter, progress bar, and a legend. Whole trip animates over ~14s.
 **Test:** `vitest run RouteMap` (react-leaflet mocked) → 1 passed (polyline + play control).
 **Remaining:** Tasks 13–14. Next: ViolationBanner + TripDashboard + PDF + dark polish (Task 13).
+
+### Task 13 — ViolationBanner + TripDashboard + PDF + polish ✅
+**Implemented:** `ViolationBanner` (renders nothing when empty, else destructive cards w/ suggestion). `TripDashboard` orchestrates everything: form (left), results (right) = stat cards (distance/drive-time/log-days), violations, RouteMap, and one EldLogSheet per day; empty + loading + error states. "Export PDF" dynamically imports jspdf+html2canvas and captures all log sheets (multi-page). `App.tsx` now renders the dashboard. Dark glassmorphism throughout. Fixed build: `defineConfig` from `vitest/config`, dropped deprecated `baseUrl`, `vi.stubGlobal` for fetch.
+**Test:** full frontend suite `vitest run` → 7 passed. `npm run build` → succeeds (tsc + vite, PDF libs code-split).
+**Remaining:** Task 14 (deploy config + README). Next: Task 14.
 
 _(entries appended after each task)_
