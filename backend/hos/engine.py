@@ -86,8 +86,14 @@ def build_timeline(
     start: datetime,
     pickup_label: str,
     dropoff_label: str,
+    pickup_offset_miles: float = 0.0,
 ) -> TripPlan:
     """Build a full TripPlan (segments + stops) for a trip.
+
+    The route is current -> pickup -> dropoff. ``pickup_offset_miles`` is the
+    distance from the current location to the pickup; the driver drives that
+    leg first, loads (1h), then continues to the dropoff (1h). With the default
+    offset of 0 the pickup sits at the origin.
 
     Walks the trip applying every property-carrying limit at once:
       - pickup / dropoff = 1h on-duty (not driving) each
@@ -101,19 +107,27 @@ def build_timeline(
     violations: list[Violation] = []
     hours_per_mile = (total_drive_hours / total_miles) if total_miles > EPS else 0.0
 
-    # Pickup (on duty, not driving) — also starts the 14h driving window.
-    pickup_arr = b.dt
-    b.add(rules.ON_DUTY, rules.PICKUP_HOURS, pickup_label, "Pickup")
-    b.add_stop("pickup", pickup_label, 0.0, pickup_arr, b.dt)
-
     miles_remaining = total_miles
     miles_done = 0.0
     drive_today = 0.0          # driving hours in the current 14h window
     drive_since_break = 0.0    # driving hours since the last 30-min break
     window_start = start       # start of the current 14h driving window
-    cycle_used = cycle_used_hours + rules.PICKUP_HOURS  # rolling on-duty total
+    cycle_used = cycle_used_hours  # rolling on-duty total
     next_fuel_at = rules.FUEL_INTERVAL_MILES
     cycle_flagged = False
+    pickup_done = False
+
+    def do_pickup() -> None:
+        nonlocal cycle_used, pickup_done
+        arr = b.dt
+        b.add(rules.ON_DUTY, rules.PICKUP_HOURS, pickup_label, "Pickup")
+        b.add_stop("pickup", pickup_label, miles_done, arr, b.dt)
+        cycle_used += rules.PICKUP_HOURS
+        pickup_done = True
+
+    # Pickup at the origin (offset 0) happens before any driving.
+    if pickup_offset_miles <= EPS:
+        do_pickup()
 
     while miles_remaining > EPS:
         # 70h/8day cycle exhausted -> 34h restart (checked first).
@@ -146,6 +160,11 @@ def build_timeline(
             window_start = b.dt
             continue
 
+        # Reached the pickup point after driving the current -> pickup leg.
+        if not pickup_done and miles_done >= pickup_offset_miles - EPS:
+            do_pickup()
+            continue
+
         # 30-min break required after 8h cumulative driving.
         if drive_since_break >= rules.BREAK_AFTER_DRIVE_HOURS - EPS:
             break_arr = b.dt
@@ -176,6 +195,8 @@ def build_timeline(
             to_miles(rules.MAX_DRIVE_HOURS - drive_today),
             to_miles(rules.MAX_DUTY_WINDOW_HOURS - window_elapsed),
         ]
+        if not pickup_done:
+            bounds.append(pickup_offset_miles - miles_done)
         chunk_miles = max(0.0, min(bounds))
         chunk_hours = chunk_miles * hours_per_mile
 
@@ -196,6 +217,9 @@ def build_timeline(
         drive_today += chunk_hours
         drive_since_break += chunk_hours
         cycle_used += chunk_hours
+
+    if not pickup_done:
+        do_pickup()
 
     # Dropoff (on duty, not driving)
     drop_arr = b.dt

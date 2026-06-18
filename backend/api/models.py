@@ -11,6 +11,7 @@ class Trip(models.Model):
     total_miles = models.FloatField(default=0)
     total_drive_hours = models.FloatField(default=0)
     route_geometry = models.JSONField(default=list)  # [[lat, lng], ...]
+    violations = models.JSONField(default=list)  # [{rule, message, suggestion}]
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
