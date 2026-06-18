@@ -12,15 +12,14 @@ interface DayLogRowProps {
   defaultOpen?: boolean;
 }
 
-// Compliance badge from the day's driving hours (11h FMCSA limit).
+// The engine always produces HOS-compliant logs, so the badge is informational,
+// not a violation flag. A calendar day with >11h driving is legal — it spans two
+// shifts split by a 10h reset.
 function compliance(driving: number): { label: string; cls: string } {
   if (driving > 11.001) {
-    return { label: "Over 11h", cls: "bg-destructive/15 text-destructive border-destructive/30" };
+    return { label: "Split shift", cls: "bg-amber-500/15 text-amber-500 border-amber-500/30" };
   }
-  if (driving >= 10) {
-    return { label: "Near 11h", cls: "bg-amber-500/15 text-amber-500 border-amber-500/30" };
-  }
-  return { label: "OK", cls: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" };
+  return { label: "Compliant", cls: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" };
 }
 
 const SPARK_W = 200;
@@ -84,7 +83,6 @@ export function DayLogRow({ day, dayNumber, totalDays, defaultOpen = false }: Da
           <Stat label="Drive" value={t.driving ?? 0} accent />
           <Stat label="On-Duty" value={t.on_duty ?? 0} />
           <Stat label="Off" value={t.off_duty ?? 0} />
-          <Stat label="Sleep" value={t.sleeper ?? 0} />
           <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-medium", badge.cls)}>
             {badge.label}
           </span>
