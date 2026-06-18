@@ -12,7 +12,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 2 | HOS types + rule constants | ✅ |
 | 3 | HOS engine — single-day (drive/break/fuel/pickup/dropoff) | ✅ |
 | 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ✅ |
-| 5 | Split timeline into per-day log sheets | ⬜ |
+| 5 | Split timeline into per-day log sheets | ✅ |
 | 6 | OpenRouteService client (geocode + route) | ⬜ |
 | 7 | Trip models + migrations | ⬜ |
 | 8 | Create-trip endpoint + serializers | ⬜ |
@@ -46,5 +46,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** Rewrote the driving loop with checks-at-top: 70h cycle → 34h off-duty restart (+ informational `Violation`); 11h drive limit / 14h window → 10h off-duty reset; 8h driving → 30-min break; 1000mi → fuel. Driving chunks bounded by all five limits so each stop lands exactly on its boundary. Tracks `drive_today`, `drive_since_break`, `window_start`, rolling `cycle_used` (seeded from input + pickup).
 **Test:** full suite `pytest tests/` → 7 passed (10h-reset, 34h-restart, fuel, single-day, types, health).
 **Remaining:** Tasks 5–14. Next: split timeline into per-day log sheets (Task 5).
+
+### Task 5 — Split timeline into per-day log sheets ✅
+**Implemented:** `split_into_days(segments)` cuts any segment that runs past midnight and groups them into `DayLog`s with per-status totals (off/sleeper/driving/on-duty). Segments ending exactly at midnight stay in their start day (no zero-length pieces). `build_timeline` now populates `TripPlan.days`. Corrected the day test to assert the real within-day invariant (start on day, end ≤ next midnight) instead of the buggy date-equality check.
+**Test:** full suite → 8 passed.
+**Remaining:** Tasks 6–14. Next: OpenRouteService client (Task 6).
 
 _(entries appended after each task)_
