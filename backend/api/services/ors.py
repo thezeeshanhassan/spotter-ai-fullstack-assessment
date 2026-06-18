@@ -10,6 +10,7 @@ import requests
 from django.conf import settings
 
 GEOCODE_URL = "https://api.openrouteservice.org/geocode/search"
+AUTOCOMPLETE_URL = "https://api.openrouteservice.org/geocode/autocomplete"
 DIRECTIONS_URL = "https://api.openrouteservice.org/v2/directions/driving-hgv/geojson"
 
 METERS_PER_MILE = 1609.34
@@ -37,6 +38,24 @@ def geocode(query: str) -> dict:
     lng, lat = feat["geometry"]["coordinates"][:2]
     label = feat.get("properties", {}).get("label", query)
     return {"label": label, "lat": lat, "lng": lng}
+
+
+def autocomplete(query: str, size: int = 5) -> list[dict]:
+    """Return up to ``size`` place suggestions as [{label, lat, lng}, ...]."""
+    resp = requests.get(
+        AUTOCOMPLETE_URL,
+        params={"api_key": settings.ORS_API_KEY, "text": query, "size": size},
+        timeout=TIMEOUT,
+    )
+    if resp.status_code != 200:
+        raise ORSError(f"Autocomplete failed ({resp.status_code}) for {query!r}")
+    out = []
+    for feat in resp.json().get("features") or []:
+        coords = feat.get("geometry", {}).get("coordinates") or [None, None]
+        lng, lat = coords[0], coords[1]
+        label = feat.get("properties", {}).get("label", query)
+        out.append({"label": label, "lat": lat, "lng": lng})
+    return out
 
 
 def route(coords: list[tuple[float, float]]) -> dict:

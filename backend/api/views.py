@@ -19,6 +19,19 @@ def health(request):
     return Response({"status": "ok"})
 
 
+@api_view(["GET"])
+def geocode_suggest(request):
+    """Proxy ORS autocomplete so the API key stays server-side."""
+    query = (request.query_params.get("q") or "").strip()
+    if len(query) < 2:
+        return Response({"results": []})
+    try:
+        results = ors.autocomplete(query)
+    except ORSError:
+        results = []
+    return Response({"results": results})
+
+
 def _downsample(geometry, max_points=800):
     """Thin a dense route geometry, always keeping the first and last points."""
     n = len(geometry)

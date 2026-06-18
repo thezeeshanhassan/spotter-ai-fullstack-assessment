@@ -1,3 +1,9 @@
+export interface Place {
+  label: string;
+  lat: number | null;
+  lng: number | null;
+}
+
 export interface TripInput {
   current_location: string;
   pickup_location: string;
