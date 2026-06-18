@@ -46,6 +46,20 @@ def split_into_days(segments: list[Segment]) -> list[DayLog]:
             cur = Segment(cur.status, next_midnight, cur.end, cur.location, cur.note)
         bucket(cur)
 
+    # Pad each day with off-duty time so it spans the full midnight->midnight
+    # 24h period (a DOT daily log must total 24 hours).
+    for key in order:
+        day = days[key]
+        day_midnight = datetime.combine(key, time.min, tzinfo=day.segments[0].start.tzinfo)
+        next_midnight = day_midnight + timedelta(days=1)
+        first, last = day.segments[0], day.segments[-1]
+        if first.start > day_midnight:
+            day.segments.insert(0, Segment(
+                rules.OFF_DUTY, day_midnight, first.start, "", "Off duty"))
+        if last.end < next_midnight:
+            day.segments.append(Segment(
+                rules.OFF_DUTY, last.end, next_midnight, "", "Off duty"))
+
     for key in order:
         day = days[key]
         totals: dict[str, float] = {
