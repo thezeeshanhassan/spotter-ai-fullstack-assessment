@@ -11,7 +11,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 1 | Backend scaffold + health endpoint | ✅ |
 | 2 | HOS types + rule constants | ✅ |
 | 3 | HOS engine — single-day (drive/break/fuel/pickup/dropoff) | ✅ |
-| 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ⬜ |
+| 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ✅ |
 | 5 | Split timeline into per-day log sheets | ⬜ |
 | 6 | OpenRouteService client (geocode + route) | ⬜ |
 | 7 | Trip models + migrations | ⬜ |
@@ -41,5 +41,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `hos/engine.py` `build_timeline(...)`. Walks the trip with a `_Builder` cursor: pickup on-duty (1h) → driving broken into chunks bounded by next-break and next-fuel boundaries → dropoff on-duty (1h). Inserts a 30-min on-duty break after 8h cumulative driving and a fuel stop every 1,000 mi. Emits matching `Stop`s (pickup/fuel/break/dropoff). Multi-day resets/cycle deferred to Task 4 (single-day path leaves violations empty).
 **Test:** `pytest tests/test_hos_engine_singleday.py` → 2 passed.
 **Remaining:** Tasks 4–14. Next: multi-day resets + 70h cycle + 34h restart (Task 4).
+
+### Task 4 — HOS engine multi-day resets + cycle + restart ✅
+**Implemented:** Rewrote the driving loop with checks-at-top: 70h cycle → 34h off-duty restart (+ informational `Violation`); 11h drive limit / 14h window → 10h off-duty reset; 8h driving → 30-min break; 1000mi → fuel. Driving chunks bounded by all five limits so each stop lands exactly on its boundary. Tracks `drive_today`, `drive_since_break`, `window_start`, rolling `cycle_used` (seeded from input + pickup).
+**Test:** full suite `pytest tests/` → 7 passed (10h-reset, 34h-restart, fuel, single-day, types, health).
+**Remaining:** Tasks 5–14. Next: split timeline into per-day log sheets (Task 5).
 
 _(entries appended after each task)_
