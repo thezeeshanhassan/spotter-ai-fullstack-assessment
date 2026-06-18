@@ -13,7 +13,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 3 | HOS engine — single-day (drive/break/fuel/pickup/dropoff) | ✅ |
 | 4 | HOS engine — multi-day resets + 70h cycle + 34h restart | ✅ |
 | 5 | Split timeline into per-day log sheets | ✅ |
-| 6 | OpenRouteService client (geocode + route) | ⬜ |
+| 6 | OpenRouteService client (geocode + route) | ✅ |
 | 7 | Trip models + migrations | ⬜ |
 | 8 | Create-trip endpoint + serializers | ⬜ |
 | 9 | Frontend scaffold + Tailwind + shadcn + API client | ⬜ |
@@ -51,5 +51,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `split_into_days(segments)` cuts any segment that runs past midnight and groups them into `DayLog`s with per-status totals (off/sleeper/driving/on-duty). Segments ending exactly at midnight stay in their start day (no zero-length pieces). `build_timeline` now populates `TripPlan.days`. Corrected the day test to assert the real within-day invariant (start on day, end ≤ next midnight) instead of the buggy date-equality check.
 **Test:** full suite → 8 passed.
 **Remaining:** Tasks 6–14. Next: OpenRouteService client (Task 6).
+
+### Task 6 — OpenRouteService client ✅
+**Implemented:** `api/services/ors.py` — `geocode(query)` → {label,lat,lng} (first feature) and `route(coords)` → {distance_miles, duration_hours, geometry:[[lat,lng]]} via driving-hgv GeoJSON. Key from `settings.ORS_API_KEY`, never client-exposed. `ORSError` on failures. ORS returns [lng,lat]; we flip to [lat,lng] for Leaflet.
+**Test:** mocked `pytest tests/test_ors.py` → 2 passed. Live smoke test with real key confirmed (Chicago→Des Moines 334mi/7.8h).
+**Remaining:** Tasks 7–14. Next: Trip/Stop/LogDay models + migrations (Task 7).
 
 _(entries appended after each task)_
