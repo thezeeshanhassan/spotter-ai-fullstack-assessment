@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.75rem;
+  /* Dark, slate-indigo theme */
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 40% 11%;
+  --card-foreground: 210 40% 98%;
+  --primary: 244 75% 66%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 222 30% 16%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 199 89% 48%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 222 30% 20%;
+  --input: 222 30% 20%;
+  --ring: 244 75% 66%;
+}
+
+html.light {
+  --background: 210 40% 97%;
+  --foreground: 222 47% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 12%;
+  --primary: 244 70% 58%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 214 32% 91%;
+  --muted-foreground: 215 18% 40%;
+  --accent: 199 89% 42%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 28% 84%;
+  --input: 214 28% 84%;
+  --ring: 244 70% 58%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, hsl(244 75% 66% / 0.16), transparent),
+    radial-gradient(900px 500px at -10% 10%, hsl(199 89% 48% / 0.12), transparent),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.light body {
+  background:
+    radial-gradient(1100px 560px at 85% -10%, hsl(244 70% 58% / 0.1), transparent),
+    radial-gradient(900px 500px at -10% 5%, hsl(199 89% 48% / 0.08), transparent),
+    hsl(var(--background));
+}
+
+html.light .glass {
+  background: hsl(0 0% 100% / 0.75);
+  border: 1px solid hsl(var(--border));
+}
+
+/* Glassmorphism surface used across cards/panels */
+.glass {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid hsl(var(--border) / 0.8);
+}
