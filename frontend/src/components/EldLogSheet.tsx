@@ -5,6 +5,8 @@ interface EldLogSheetProps {
   day: DayLog;
   dayNumber: number;
   totalDays: number;
+  /** Render only the SVG grid (no Card wrapper / header) for embedding. */
+  bare?: boolean;
 }
 
 const ROWS: { key: DutyStatus; label: string }[] = [
@@ -60,7 +62,7 @@ function fmtHrs(h: number): string {
   return (Math.round(h * 100) / 100).toFixed(2);
 }
 
-export function EldLogSheet({ day, dayNumber, totalDays }: EldLogSheetProps) {
+export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogSheetProps) {
   const points = buildPoints(day.segments, day.date);
   const remarks = day.segments
     .filter((s) => s.location || s.note)
@@ -69,14 +71,7 @@ export function EldLogSheet({ day, dayNumber, totalDays }: EldLogSheetProps) {
       text: s.location || s.note,
     }));
 
-  return (
-    <Card className="overflow-x-auto p-4">
-      <div className="mb-3 flex items-center justify-between px-1">
-        <h3 className="text-sm font-semibold">
-          Driver&apos;s Daily Log — Day {dayNumber} of {totalDays}
-        </h3>
-        <span className="text-xs text-muted-foreground">{day.date} · 24h (UTC)</span>
-      </div>
+  const svg = (
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="w-full min-w-[760px]"
@@ -202,6 +197,19 @@ export function EldLogSheet({ day, dayNumber, totalDays }: EldLogSheetProps) {
           </g>
         ))}
       </svg>
+  );
+
+  if (bare) return <div className="overflow-x-auto">{svg}</div>;
+
+  return (
+    <Card className="overflow-x-auto p-4">
+      <div className="mb-3 flex items-center justify-between px-1">
+        <h3 className="text-sm font-semibold">
+          Driver&apos;s Daily Log — Day {dayNumber} of {totalDays}
+        </h3>
+        <span className="text-xs text-muted-foreground">{day.date} · 24h (UTC)</span>
+      </div>
+      {svg}
     </Card>
   );
 }

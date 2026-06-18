@@ -31,3 +31,19 @@ def test_create_trip(monkeypatch):
 def test_create_trip_validation():
     res = APIClient().post("/api/trips/", {"current_location": "X"}, format="json")
     assert res.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_trip_unroutable_returns_422(monkeypatch):
+    from api.services import ors
+    from api.services.ors import ORSError
+    monkeypatch.setattr(ors, "geocode", lambda q: {"label": q, "lat": 1.0, "lng": 1.0})
+    def boom(_coords):
+        raise ORSError("Routing failed (404): no route")
+    monkeypatch.setattr(ors, "route", boom)
+    res = APIClient().post("/api/trips/", {
+        "current_location": "A", "pickup_location": "B",
+        "dropoff_location": "C", "cycle_used_hrs": 0,
+    }, format="json")
+    assert res.status_code == 422
+    assert "detail" in res.json()

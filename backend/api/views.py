@@ -11,6 +11,7 @@ from hos.engine import build_timeline
 from .models import LogDay, Stop, Trip
 from .serializers import TripInputSerializer, TripSerializer
 from .services import ors
+from .services.ors import ORSError
 
 
 @api_view(["GET"])
@@ -45,14 +46,24 @@ def create_trip(request):
     data = serializer.validated_data
 
     # Geocode the three locations, then route current -> pickup -> dropoff.
-    current = ors.geocode(data["current_location"])
-    pickup = ors.geocode(data["pickup_location"])
-    dropoff = ors.geocode(data["dropoff_location"])
-    routed = ors.route([
-        (current["lat"], current["lng"]),
-        (pickup["lat"], pickup["lng"]),
-        (dropoff["lat"], dropoff["lng"]),
-    ])
+    try:
+        current = ors.geocode(data["current_location"])
+        pickup = ors.geocode(data["pickup_location"])
+        dropoff = ors.geocode(data["dropoff_location"])
+        routed = ors.route([
+            (current["lat"], current["lng"]),
+            (pickup["lat"], pickup["lng"]),
+            (dropoff["lat"], dropoff["lng"]),
+        ])
+    except ORSError as exc:
+        return Response(
+            {"detail": (
+                "Could not plan this route. Check the locations are valid and "
+                "connected by road (no cross-ocean routes). "
+                f"[{exc}]"
+            )},
+            status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
 
     geometry = _downsample(routed["geometry"])
     legs = routed.get("legs") or []
