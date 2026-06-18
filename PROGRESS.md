@@ -15,7 +15,7 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 | 5 | Split timeline into per-day log sheets | ✅ |
 | 6 | OpenRouteService client (geocode + route) | ✅ |
 | 7 | Trip models + migrations | ✅ |
-| 8 | Create-trip endpoint + serializers | ⬜ |
+| 8 | Create-trip endpoint + serializers | ✅ |
 | 9 | Frontend scaffold + Tailwind + shadcn + API client | ⬜ |
 | 10 | TripForm component | ⬜ |
 | 11 | EldLogSheet SVG component | ⬜ |
@@ -61,5 +61,10 @@ Legend: ✅ done · �dev in progress · ⬜ not started
 **Implemented:** `api/models.py` — `Trip` (locations, cycle_used_hrs, totals, route_geometry JSON, created_at), `Stop` (FK related_name=stops, type/label/mile_marker/lat/lng/arrival/departure), `LogDay` (FK related_name=days, date, segments JSON, totals JSON). Migration `0001_initial` generated + applied.
 **Test:** `pytest tests/test_models.py` → 1 passed.
 **Remaining:** Tasks 8–14. Next: create-trip endpoint + serializers (Task 8).
+
+### Task 8 — Create-trip endpoint + serializers ✅
+**Implemented:** `POST /api/trips/` geocodes the 3 locations, routes current→pickup→dropoff (ORS), derives `pickup_offset_miles` from leg 0, runs `build_timeline`, persists `Trip`+`Stop`s+`LogDay`s, returns full JSON (route, stops, days, violations). `GET /api/trips/<id>/` re-loads a saved trip. Stops without coords get interpolated along the geometry. Serializers: `TripInputSerializer` (validation, cycle 0–70), `TripSerializer`/`StopSerializer`/`LogDaySerializer`. Added `Trip.violations` JSON field (migration 0002). Also extended `ors.route` to return per-leg distances.
+**Test:** full suite → 14 passed (create 201 + round-trip GET, validation 400).
+**Remaining:** Tasks 9–14 (frontend + deploy). Next: frontend scaffold (Task 9).
 
 _(entries appended after each task)_
