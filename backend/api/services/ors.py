@@ -44,7 +44,11 @@ def route(coords: list[tuple[float, float]]) -> dict:
 
     Returns {distance_miles, duration_hours, geometry:[[lat,lng], ...]}.
     """
-    body = {"coordinates": [[lng, lat] for (lat, lng) in coords]}
+    # Geocoded city centroids can sit off the road network; -1 = unlimited snap radius.
+    body = {
+        "coordinates": [[lng, lat] for (lat, lng) in coords],
+        "radiuses": [-1] * len(coords),
+    }
     resp = requests.post(
         DIRECTIONS_URL,
         json=body,
@@ -52,7 +56,15 @@ def route(coords: list[tuple[float, float]]) -> dict:
         timeout=TIMEOUT,
     )
     if resp.status_code != 200:
-        raise ORSError(f"Routing failed ({resp.status_code})")
+        detail = None
+        try:
+            detail = resp.json().get("error", {}).get("message")
+        except ValueError:
+            pass
+        msg = f"Routing failed ({resp.status_code})"
+        if detail:
+            msg = f"{msg}: {detail}"
+        raise ORSError(msg)
     features = resp.json().get("features") or []
     if not features:
         raise ORSError("No route returned")
