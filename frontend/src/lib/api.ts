@@ -30,10 +30,17 @@ export async function getTrip(id: number): Promise<TripResult> {
   return handle(res);
 }
 
-export async function suggestPlaces(query: string, signal?: AbortSignal): Promise<Place[]> {
+export async function suggestPlaces(
+  query: string,
+  size = 20,
+  signal?: AbortSignal,
+): Promise<Place[]> {
   if (query.trim().length < 2) return [];
   try {
-    const res = await fetch(`${BASE}/api/geocode/?q=${encodeURIComponent(query)}`, { signal });
+    const res = await fetch(
+      `${BASE}/api/geocode/?q=${encodeURIComponent(query)}&size=${size}`,
+      { signal },
+    );
     if (!res.ok) return [];
     const body = await res.json();
     return body.results ?? [];

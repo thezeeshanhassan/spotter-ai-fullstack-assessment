@@ -76,6 +76,12 @@ export function RouteMap({ result }: { result: TripResult }) {
   const raf = React.useRef<number | null>(null);
   const last = React.useRef<number | null>(null);
 
+  // Reset playback whenever a new trip is loaded.
+  React.useEffect(() => {
+    setProgress(0);
+    setPlaying(false);
+  }, [result.id]);
+
   React.useEffect(() => {
     if (!playing) return;
     function step(ts: number) {

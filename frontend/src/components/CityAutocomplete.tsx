@@ -18,51 +18,36 @@ interface CityAutocompleteProps {
   placeholder?: string;
 }
 
-// Shown on focus / for very short input. Real coords so picking one is valid.
-const POPULAR: Place[] = [
-  { label: "Atlanta, GA, USA", lat: 33.749, lng: -84.388 },
-  { label: "Boston, MA, USA", lat: 42.3601, lng: -71.0589 },
-  { label: "Chicago, IL, USA", lat: 41.8781, lng: -87.6298 },
-  { label: "Dallas, TX, USA", lat: 32.7767, lng: -96.797 },
-  { label: "Denver, CO, USA", lat: 39.7392, lng: -104.9903 },
-  { label: "Houston, TX, USA", lat: 29.7604, lng: -95.3698 },
-  { label: "Los Angeles, CA, USA", lat: 34.0522, lng: -118.2437 },
-  { label: "Miami, FL, USA", lat: 25.7617, lng: -80.1918 },
-  { label: "New York, NY, USA", lat: 40.7128, lng: -74.006 },
-  { label: "Philadelphia, PA, USA", lat: 39.9526, lng: -75.1652 },
-  { label: "Phoenix, AZ, USA", lat: 33.4484, lng: -112.074 },
-  { label: "Seattle, WA, USA", lat: 47.6062, lng: -122.3321 },
-];
+const PAGE = 20; // results per fetch; grows as the user scrolls
 
 export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, placeholder }: CityAutocompleteProps) {
   const [results, setResults] = React.useState<Place[]>([]);
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [active, setActive] = React.useState(-1);
+  const [size, setSize] = React.useState(PAGE);
   const justSelected = React.useRef(false);
   const boxRef = React.useRef<HTMLDivElement>(null);
 
-  // Debounced suggestion fetch.
+  const query = value.trim();
+  const canSearch = query.length >= 2;
+
+  // Debounced live fetch — re-runs on new query or when "size" grows (load more).
   React.useEffect(() => {
     if (justSelected.current) {
       justSelected.current = false;
       return;
     }
-    // For empty / 1-char input, show the popular list (filtered) instead of
-    // hitting the network.
-    const q = value.trim().toLowerCase();
-    if (q.length < 2) {
-      setResults(q ? POPULAR.filter((p) => p.label.toLowerCase().includes(q)) : POPULAR);
-      setActive(-1);
+    if (!canSearch) {
+      setResults([]);
       setLoading(false);
       return;
     }
     const ctrl = new AbortController();
     setLoading(true);
     const t = setTimeout(async () => {
-      const r = await suggestPlaces(value, ctrl.signal);
+      const r = await suggestPlaces(value, size, ctrl.signal);
       setResults(r);
-      setOpen(r.length > 0);
       setActive(-1);
       setLoading(false);
     }, 280);
@@ -70,7 +55,7 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
       clearTimeout(t);
       ctrl.abort();
     };
-  }, [value]);
+  }, [value, size, canSearch]);
 
   // Close on outside click.
   React.useEffect(() => {
@@ -87,6 +72,15 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
     onSelect?.(place);
     setOpen(false);
     setResults([]);
+  }
+
+  function onScroll(e: React.UIEvent<HTMLUListElement>) {
+    const el = e.currentTarget;
+    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
+    // Only ask for more if the last page came back full (likely more available).
+    if (nearBottom && !loading && results.length >= size) {
+      setSize((s) => s + PAGE);
+    }
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
@@ -120,8 +114,10 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
           onChange={(e) => {
             onChange(e.target.value);
             onSelect?.(null); // typing invalidates any prior pick
+            setSize(PAGE); // reset paging for the new query
+            setOpen(true);
           }}
-          onFocus={() => setOpen(results.length > 0)}
+          onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
         />
         {loading && (
@@ -129,15 +125,22 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
         )}
       </div>
 
-      {open && results.length > 0 && (
+      {open && (
         <ul
-          className="glass absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg p-1 shadow-xl"
+          className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card p-1 shadow-2xl"
           role="listbox"
+          onScroll={onScroll}
         >
-          {value.trim().length < 2 && (
-            <li className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Popular cities
+          {!canSearch && (
+            <li className="px-3 py-2 text-sm text-muted-foreground">Type at least 2 characters…</li>
+          )}
+          {canSearch && results.length === 0 && loading && (
+            <li className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching…
             </li>
+          )}
+          {canSearch && results.length === 0 && !loading && (
+            <li className="px-3 py-2 text-sm text-muted-foreground">No results found</li>
           )}
           {results.map((p, i) => (
             <li key={`${p.label}-${i}`} role="option" aria-selected={i === active}>
@@ -154,6 +157,11 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
               </button>
             </li>
           ))}
+          {results.length > 0 && loading && (
+            <li className="flex items-center justify-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading more…
+            </li>
+          )}
         </ul>
       )}
     </div>

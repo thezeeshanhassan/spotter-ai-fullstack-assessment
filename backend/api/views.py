@@ -26,7 +26,12 @@ def geocode_suggest(request):
     if len(query) < 2:
         return Response({"results": []})
     try:
-        results = ors.autocomplete(query)
+        size = int(request.query_params.get("size", 20))
+    except ValueError:
+        size = 20
+    size = max(5, min(size, 50))  # clamp to a sane range
+    try:
+        results = ors.autocomplete(query, size=size)
     except ORSError:
         results = []
     return Response({"results": results})

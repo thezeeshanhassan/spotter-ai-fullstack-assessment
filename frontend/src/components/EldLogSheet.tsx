@@ -80,10 +80,11 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
   const points = buildPoints(day.segments, day.date);
   const remarks = day.segments
     .filter((s) => REMARK_NOTES.has(s.note))
-    .map((s) => ({
-      x: LEFT + fracHour(s.start, day.date) * HOUR_W,
-      text: s.location || s.note,
-    }));
+    .map((s) => {
+      const x1 = LEFT + fracHour(s.start, day.date) * HOUR_W;
+      const x2 = LEFT + fracHour(s.end, day.date) * HOUR_W;
+      return { x1, x2: Math.max(x2, x1 + 6), text: s.location || s.note };
+    });
 
   // Per-day fields only. The fixed identification fields (carrier, vehicle,
   // co-driver, shipper, certification) are shown once for the whole trip in
@@ -199,28 +200,42 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
         <text x={10} y={TOP + GRID_H + 20} fontSize={10} fill="hsl(var(--foreground))" fontWeight={600}>
           Remarks
         </text>
-        {remarks.map((r, i) => (
-          <g key={`r${i}`}>
-            <line
-              x1={r.x}
-              y1={TOP + GRID_H}
-              x2={r.x}
-              y2={TOP + GRID_H + 12}
-              stroke="hsl(var(--muted-foreground))"
-              strokeWidth={0.6}
-              opacity={0.7}
-            />
-            <text
-              x={r.x + 2}
-              y={TOP + GRID_H + 16}
-              fontSize={7.5}
-              fill="hsl(var(--muted-foreground))"
-              transform={`rotate(45 ${r.x + 2} ${TOP + GRID_H + 16})`}
-            >
-              {r.text.length > 22 ? r.text.slice(0, 21) + "…" : r.text}
-            </text>
-          </g>
-        ))}
+        {remarks.map((r, i) => {
+          const top = TOP + GRID_H;
+          const mid = (r.x1 + r.x2) / 2;
+          return (
+            <g key={`r${i}`}>
+              {/* DOT-style bracket spanning the event start -> end */}
+              <polyline
+                points={`${r.x1},${top} ${r.x1},${top + 8} ${r.x2},${top + 8} ${r.x2},${top}`}
+                fill="none"
+                stroke="hsl(var(--muted-foreground))"
+                strokeWidth={0.8}
+                opacity={0.8}
+              />
+              {/* Drop line from the middle of the bracket to the label */}
+              <line
+                x1={mid}
+                y1={top + 8}
+                x2={mid}
+                y2={top + 16}
+                stroke="hsl(var(--muted-foreground))"
+                strokeWidth={0.8}
+                opacity={0.8}
+              />
+              <text
+                x={mid}
+                y={top + 18}
+                fontSize={7.5}
+                textAnchor="end"
+                fill="hsl(var(--muted-foreground))"
+                transform={`rotate(-45 ${mid} ${top + 18})`}
+              >
+                {r.text.length > 22 ? r.text.slice(0, 21) + "…" : r.text}
+              </text>
+            </g>
+          );
+        })}
       </svg>
   );
 
