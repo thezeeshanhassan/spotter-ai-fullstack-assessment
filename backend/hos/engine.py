@@ -41,9 +41,14 @@ def split_into_days(segments: list[Segment]) -> list[DayLog]:
             )
             if cur.end <= next_midnight:
                 break
-            head = Segment(cur.status, cur.start, next_midnight, cur.location, cur.note)
+            # Split miles in proportion to the time before/after midnight.
+            total_h = cur.duration_hours() or 1.0
+            head_h = (next_midnight - cur.start).total_seconds() / 3600
+            head_miles = cur.miles * (head_h / total_h)
+            head = Segment(cur.status, cur.start, next_midnight, cur.location, cur.note, head_miles)
             bucket(head)
-            cur = Segment(cur.status, next_midnight, cur.end, cur.location, cur.note)
+            cur = Segment(cur.status, next_midnight, cur.end, cur.location, cur.note,
+                          cur.miles - head_miles)
         bucket(cur)
 
     # Pad each day with off-duty time so it spans the full midnight->midnight
@@ -69,6 +74,7 @@ def split_into_days(segments: list[Segment]) -> list[DayLog]:
         for seg in day.segments:
             totals[seg.status] = totals.get(seg.status, 0.0) + seg.duration_hours()
         day.totals = totals
+        day.driving_miles = sum(s.miles for s in day.segments if s.status == rules.DRIVING)
 
     return [days[key] for key in order]
 
@@ -81,8 +87,9 @@ class _Builder:
         self.segments: list[Segment] = []
         self.stops: list[Stop] = []
 
-    def add(self, status: str, hours: float, location: str = "", note: str = "") -> Segment:
-        seg = Segment(status, self.dt, self.dt + timedelta(hours=hours), location, note)
+    def add(self, status: str, hours: float, location: str = "", note: str = "",
+            miles: float = 0.0) -> Segment:
+        seg = Segment(status, self.dt, self.dt + timedelta(hours=hours), location, note, miles)
         self.segments.append(seg)
         self.dt = seg.end
         return seg
@@ -225,7 +232,7 @@ def build_timeline(
             window_start = b.dt
             continue
 
-        b.add(rules.DRIVING, chunk_hours, note="Driving")
+        b.add(rules.DRIVING, chunk_hours, note="Driving", miles=chunk_miles)
         miles_done += chunk_miles
         miles_remaining -= chunk_miles
         drive_today += chunk_hours

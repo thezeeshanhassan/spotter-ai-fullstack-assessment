@@ -32,7 +32,7 @@ class StopSerializer(serializers.ModelSerializer):
 class LogDaySerializer(serializers.ModelSerializer):
     class Meta:
         model = LogDay
-        fields = ["date", "segments", "totals"]
+        fields = ["date", "segments", "totals", "driving_miles"]
 
 
 class TripSerializer(serializers.ModelSerializer):

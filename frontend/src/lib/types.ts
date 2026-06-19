@@ -41,6 +41,7 @@ export interface DayLog {
   date: string; // YYYY-MM-DD
   segments: Segment[];
   totals: Record<DutyStatus, number>;
+  driving_miles: number;
 }
 
 export interface Violation {

@@ -18,6 +18,7 @@ class Segment:
     end: datetime
     location: str = ""
     note: str = ""
+    miles: float = 0.0  # miles covered (driving segments only)
 
     def duration_hours(self) -> float:
         return (self.end - self.start).total_seconds() / 3600
@@ -43,6 +44,7 @@ class DayLog:
     date: date
     segments: list[Segment] = field(default_factory=list)
     totals: dict[str, float] = field(default_factory=dict)
+    driving_miles: float = 0.0  # total miles driven this calendar day
 
 
 @dataclass
