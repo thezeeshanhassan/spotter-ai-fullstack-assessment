@@ -1,14 +1,17 @@
 import * as React from "react";
 
-export type AppPage = "home" | "about";
+export type AppPage = "home" | "about" | "developer";
 
 const PATHS: Record<AppPage, string> = {
   home: "/",
   about: "/about",
+  developer: "/developer",
 };
 
 function pageFromPath(path: string): AppPage {
-  return path === PATHS.about ? "about" : "home";
+  if (path === PATHS.about) return "about";
+  if (path === PATHS.developer) return "developer";
+  return "home";
 }
 
 /** Minimal client router — works with Vercel SPA rewrites, no extra dependency. */

@@ -38,6 +38,7 @@ Full design, architecture, and deployment guide: **[docs/DESIGN.md](docs/DESIGN.
 - **Drawn DOT log sheets**, one per day, with duty-status line, per-status totals, remarks.
 - **Export to PDF.** Dark/light theme, fully responsive.
 - **About page** (`/about`) — HOS rules, policies, and limitations (including route length cap).
+- **Developer page** (`/developer`) — short author bio, email & repo links (edit `frontend/src/lib/developer.ts`).
 
 ## Project layout
 

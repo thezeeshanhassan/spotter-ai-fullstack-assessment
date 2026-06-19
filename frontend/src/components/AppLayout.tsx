@@ -1,15 +1,14 @@
-import { Info, Moon, Sun, Truck } from "lucide-react";
+import { Info, Moon, Sun, Truck, User } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import type { AppPage } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { toggleTheme, useTheme } from "@/lib/theme";
 
-type Page = "home" | "about";
-
 interface AppLayoutProps {
-  page: Page;
-  onNavigate: (page: Page) => void;
+  page: AppPage;
+  onNavigate: (page: AppPage) => void;
   children: React.ReactNode;
 }
 
@@ -42,6 +41,10 @@ export function AppLayout({ page, onNavigate, children }: AppLayoutProps) {
           <NavTab active={page === "about"} onClick={() => onNavigate("about")}>
             <Info className="h-4 w-4" />
             About
+          </NavTab>
+          <NavTab active={page === "developer"} onClick={() => onNavigate("developer")}>
+            <User className="h-4 w-4" />
+            Developer
           </NavTab>
           <Button
             type="button"

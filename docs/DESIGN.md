@@ -139,6 +139,7 @@ components/
   ViolationBanner.tsx
   TripDashboard.tsx  orchestrates the two sections
   AboutPage.tsx      rules, policies, limitations (/about)
+  DeveloperPage.tsx  author intro & links (/developer)
   AppLayout.tsx      shared header, nav, theme toggle
 vercel.json     SPA routing for Vercel
 ```
