@@ -7,7 +7,7 @@ assessment.
 > **Inputs:** current location · pickup location · dropoff location · current cycle used (hrs)
 > **Outputs:** an interactive route map (stops, rests, fuel) + one drawn DOT daily log sheet per day.
 
-- **Live demo:** _add your Vercel URL here_
+- **Live demo:** https://spotter-ai-fullstack-assessment.vercel.app
 - **API:** https://16.170.244.106.nip.io (AWS EC2 · Docker · Caddy auto-HTTPS)
 - **Loom walkthrough:** _add Loom link_
 
