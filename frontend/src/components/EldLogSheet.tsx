@@ -76,7 +76,7 @@ function fmtDate(iso: string): string {
   return `${months[Number(m) - 1]} ${Number(d)}, ${y}`;
 }
 
-const DRIVER = "J. Doe · JD"; // driver name · initials (placeholder)
+const DRIVER = "J. Doe, JD"; // driver name, initials (placeholder)
 
 function clock(iso: string): string {
   const dt = new Date(iso);
@@ -214,8 +214,8 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
           const x2 = LEFT + fracHour(s.end, day.date) * HOUR_W;
           if (x2 - x1 < 0.5) return null;
           const y = rowY(s.status);
-          const extra = s.note && s.note !== "Driving" && s.note !== "Off duty" ? ` · ${s.note}` : "";
-          const loc = s.location ? ` · ${s.location}` : "";
+          const extra = s.note && s.note !== "Driving" && s.note !== "Off duty" ? `, ${s.note}` : "";
+          const loc = s.location ? `, ${s.location}` : "";
           const hrs = (new Date(s.end).getTime() - new Date(s.start).getTime()) / 3_600_000;
           return (
             <line
@@ -291,9 +291,9 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between px-1">
         <h3 className="text-sm font-semibold">
-          Driver&apos;s Daily Log — Day {dayNumber} of {totalDays}
+          Driver&apos;s Daily Log, Day {dayNumber} of {totalDays}
         </h3>
-        <span className="text-xs text-muted-foreground">{day.date} · 24h (UTC)</span>
+        <span className="text-xs text-muted-foreground">{day.date}, 24h (UTC)</span>
       </div>
       {header}
       <div className="overflow-x-auto">{svg}</div>

@@ -16,7 +16,7 @@ const HOS_RULES = [
 
 const ASSUMPTIONS = [
   "Property-carrying commercial driver (not passenger-carrying).",
-  "70-hour / 8-day schedule — no adverse-driving or short-haul exceptions.",
+  "70-hour / 8-day schedule. No adverse-driving or short-haul exceptions.",
   "Fuel stop at least every 1,000 miles (30 minutes on duty, not driving).",
   "1 hour on duty for pickup and 1 hour on duty for dropoff.",
   "Route order is always: current location → pickup → dropoff.",
@@ -43,19 +43,19 @@ const LIMITATIONS: { title: string; body: ReactNode }[] = [
         OpenRouteService rejects some ultra-long routes when the path exceeds{" "}
         <strong className={bold}>~3,700 miles (6,000 km)</strong> per request. Very long
         cross-country zigzags may show a{" "}
-        <strong className={bold}>“route too long”</strong> error instead of a plan — try
+        <strong className={bold}>“route too long”</strong> error instead of a plan. Try
         locations that are closer together. Longest routes that usually work are around{" "}
-        <strong className={bold}>4,300–4,600 miles</strong>.
+        <strong className={bold}>4,300 to 4,600 miles</strong>.
       </>
     ),
   },
   {
     title: "Trip start time",
-    body: "Planning starts at the current time, so trips begun late in the day often cross midnight and produce more daily log sheets — even for relatively short drives.",
+    body: "Planning starts at the current time, so trips begun late in the day often cross midnight and produce more daily log sheets, even for relatively short drives.",
   },
   {
     title: "Placeholder log header fields",
-    body: "Vehicle number, carrier name, shipper, and similar header fields on the log sheet are placeholders for display — they are not collected or stored.",
+    body: "Vehicle number, carrier name, shipper, and similar header fields on the log sheet are placeholders for display. They are not collected or stored.",
   },
   {
     title: "Location search required",
@@ -73,7 +73,7 @@ export function AboutPage() {
             What this app does
           </CardTitle>
           <CardDescription>
-            ELD stands for <strong>Electronic Logging Device</strong> — the system truck
+            ELD stands for <strong>Electronic Logging Device</strong>, the system truck
             drivers use to record legal work hours. This app simulates that output.
           </CardDescription>
         </CardHeader>
@@ -87,13 +87,13 @@ export function AboutPage() {
             <li>An interactive <strong className="text-foreground">route map</strong> with pickup, dropoff, fuel, breaks, and rest stops.</li>
             <li>
               <strong className="text-foreground">Daily log sheets</strong> drawn like the
-              U.S. DOT (Department of Transportation) Record of Duty Status grid — one sheet
+              U.S. DOT (Department of Transportation) Record of Duty Status grid, one sheet
               per calendar day.
             </li>
           </ul>
           <p>
             Rules follow the FMCSA (Federal Motor Carrier Safety Administration){" "}
-            <em>Hours of Service</em> guide for property-carrying drivers — 49 CFR Part 395.
+            <em>Hours of Service</em> guide for property-carrying drivers (49 CFR Part 395).
           </p>
         </CardContent>
       </Card>
@@ -153,7 +153,7 @@ export function AboutPage() {
               How many <strong>on-duty hours</strong> the driver has already worked in their
               current 70-hour / 8-day window before this trip. Leave empty or enter{" "}
               <strong>0</strong> for a fresh driver. Valid range: 0–70 hours. On-duty includes
-              driving, pickup/dropoff, fuel stops, and breaks — not normal 10-hour off-duty rests.
+              driving, pickup/dropoff, fuel stops, and breaks. Normal 10-hour off-duty rests do not count.
             </p>
           </div>
           <div>
@@ -179,7 +179,7 @@ export function AboutPage() {
             If a trip would exceed the <strong className="text-foreground">70-hour / 8-day</strong>{" "}
             on-duty limit, the app shows a red banner and automatically inserts a{" "}
             <strong className="text-foreground">34-hour off-duty restart</strong> so the
-            schedule stays legal. This is expected on long hauls — not a failure.
+            schedule stays legal. This is expected on long hauls and is not a failure.
           </p>
           <p>
             The warning means the engine adjusted the plan to comply with federal rules. The
@@ -189,14 +189,14 @@ export function AboutPage() {
           <p>
             A single calendar day can legally contain more than 11 hours of driving if two
             shifts are separated by a 10-hour reset (“split shift”). Such days may be labeled
-            informational — the engine always inserts required rest before limits are broken.
+            informational. The engine always inserts required rest before limits are broken.
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Daily log sheets — how days are counted</CardTitle>
+          <CardTitle>Daily log sheets: how days are counted</CardTitle>
           <CardDescription>There is no fixed minimum number of log days.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
@@ -208,7 +208,7 @@ export function AboutPage() {
           </p>
           <p>
             Trips with more than ~11 hours of driving almost always need a 10-hour reset, which
-            pushes the timeline past midnight — so <strong className="text-foreground">2+ log days</strong>{" "}
+            pushes the timeline past midnight, so <strong className="text-foreground">2+ log days</strong>{" "}
             is common even for moderate trips. Long cross-country routes can produce 10+ sheets.
           </p>
         </CardContent>

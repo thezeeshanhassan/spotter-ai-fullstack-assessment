@@ -7,7 +7,7 @@ const FIELDS: { label: string; value: string }[] = [
   { label: "Main office", value: "Dispatch HQ" },
   { label: "Truck / Trailer #", value: "TRK-001 / TRL-001" },
   { label: "Co-driver", value: "N/A" },
-  { label: "Shipper / Commodity", value: "N/A · General freight" },
+  { label: "Shipper / Commodity", value: "N/A, General freight" },
   { label: "Certification", value: "Entries true & correct" },
 ];
 

@@ -81,7 +81,7 @@ export function DaySelector({ days, selected, onSelect }: DaySelectorProps) {
                   ? "border-primary bg-foreground text-background"
                   : "border-border bg-muted/40 hover:bg-muted",
               )}
-              title={`Day ${i + 1} · ${day.date}`}
+              title={`Day ${i + 1}, ${day.date}`}
             >
               <span className={cn("text-[10px] leading-none", sel ? "opacity-70" : "text-muted-foreground")}>
                 {mon} {dom}

@@ -69,10 +69,10 @@ export function TripDashboard() {
 
   return (
     <>
-      {/* SECTION 1 — Trip input + route map */}
+      {/* SECTION 1: Trip input + route map */}
       <section className="mb-10">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          1 · Route &amp; Stops
+          1. Route &amp; Stops
         </h2>
         <div className="grid items-stretch gap-6 lg:grid-cols-[360px_1fr]">
           <div className="flex flex-col gap-4">
@@ -106,12 +106,12 @@ export function TripDashboard() {
         </div>
       </section>
 
-      {/* SECTION 2 — Daily logs */}
+      {/* SECTION 2: Daily logs */}
       {result && (
         <section>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              2 · Daily Logs <span className="normal-case text-foreground">({result.days.length} days)</span>
+              2. Daily Logs <span className="normal-case text-foreground">({result.days.length} days)</span>
             </h2>
             <Button variant="outline" size="sm" onClick={exportPdf} disabled={exporting}>
               <Download className="h-4 w-4" />

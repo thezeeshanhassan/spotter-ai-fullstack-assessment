@@ -82,7 +82,7 @@ export function DeveloperPage() {
       </Card>
 
       <p className="text-center text-xs text-muted-foreground">
-        Built for the Spotter AI full-stack assessment · June 2026
+        Built for the Spotter AI full-stack assessment, June 2026
       </p>
     </div>
   );
