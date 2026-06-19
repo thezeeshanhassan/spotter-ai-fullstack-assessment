@@ -78,7 +78,7 @@ tests/             pytest: HOS unit tests + API + ORS (mocked) + models
 ### Data model
 - **Trip** — locations, `cycle_used_hrs`, totals, `route_geometry` (JSON), `violations` (JSON), `created_at`
 - **Stop** — `trip` FK, `type` (pickup/dropoff/fuel/rest/break), `label`, `mile_marker`, `lat`, `lng`, `arrival`, `departure`
-- **LogDay** — `trip` FK, `date`, `segments` (JSON), `totals` (JSON)
+- **LogDay** — `trip` FK, `date`, `segments` (JSON), `totals` (JSON), `driving_miles`
 
 ### create_trip flow
 1. Validate input (`TripInputSerializer`; cycle 0–70).
@@ -105,7 +105,7 @@ components/
   TripForm.tsx       4 fields, selection-required validation
   CityAutocomplete.tsx  debounced search + popular-cities-on-focus
   RouteMap.tsx       Leaflet map, stops, animated truck playback
-  EldLogSheet.tsx    SVG DOT log grid (one per day)
+  EldLogSheet.tsx    DOT log: identification header + SVG grid (one per day)
   DaySelector.tsx    horizontal day picker (date over index) + All
   ViolationBanner.tsx
   TripDashboard.tsx  orchestrates the two sections

@@ -112,16 +112,24 @@ OpenRouteService, so timing reflects real road speeds.
 ## 5. From timeline to daily log sheets
 
 `split_into_days(segments)`:
-1. Cuts any duty segment that crosses **midnight** into two.
+1. Cuts any duty segment that crosses **midnight** into two (driving miles on a cut
+   segment are split in proportion to time).
 2. Groups the pieces by **calendar date** — each date becomes one `DayLog` = one
    log sheet.
 3. **Pads** the first/last partial days with Off Duty from/until midnight so every
    sheet totals exactly **24.00 hours** (a DOT requirement).
-4. Computes per-status totals (Off / Sleeper / Driving / On-Duty) for the day.
+4. Computes per-status totals (Off / Sleeper / Driving / On-Duty) **and total
+   driving miles** for the day.
 
-The frontend draws each `DayLog` as an SVG re-creation of the DOT grid: 24 hour
-columns × 4 status rows, the duty-status line, per-status hour totals, and a
-remarks row noting locations of status changes.
+The frontend draws each `DayLog` as a faithful DOT *Driver's Daily Log*:
+- an **identification header** — date, **total miles driving today** (real),
+  truck/trailer #, carrier, main office, co-driver, shipper/commodity, and the
+  certification line (vehicle/carrier/shipper are placeholders, not modeled data);
+- the **24-hour grid** — 24 hour columns with 15-minute ticks × 4 duty-status rows;
+- the **duty-status line** with vertical connectors at each change;
+- **per-status hour totals** down the right (summing to 24);
+- a **remarks row** flagging only real duty-status changes (pickup, dropoff, fuel,
+  30-min break, 10h/34h rest) with location/activity — not the continuous driving.
 
 ### How many days?
 There is **no hardcoded minimum**. The number of sheets = the number of calendar
