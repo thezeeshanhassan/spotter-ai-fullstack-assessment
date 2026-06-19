@@ -1,0 +1,9 @@
+# Set this to your hostname. Two options:
+#   1. Your own domain (A record → EC2 public IP), e.g. api.yourdomain.com
+#   2. No domain? Use nip.io with your EC2 IP, e.g. 16.170.244.106.nip.io
+#      (resolves to the IP automatically; Let's Encrypt issues a real cert).
+# Caddy fetches + renews the HTTPS certificate automatically.
+16.170.244.106.nip.io {
+	encode gzip
+	reverse_proxy backend:8000
+}

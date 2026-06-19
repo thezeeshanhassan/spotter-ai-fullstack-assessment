@@ -1,0 +1,33 @@
+# Production compose for the backend on AWS EC2.
+# Caddy terminates HTTPS (auto Let's Encrypt) and reverse-proxies to gunicorn.
+# Requires a domain pointed at the EC2 public IP (see docs/DEPLOY-AWS.md).
+
+services:
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      - SQLITE_PATH=/data/db.sqlite3
+    volumes:
+      - dbdata:/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  dbdata:
+  caddy_data:
+  caddy_config:
