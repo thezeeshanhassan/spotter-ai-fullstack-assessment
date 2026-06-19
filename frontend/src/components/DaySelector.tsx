@@ -21,15 +21,32 @@ function parts(date: string) {
 
 export function DaySelector({ days, selected, onSelect }: DaySelectorProps) {
   const scroller = React.useRef<HTMLDivElement>(null);
-  const scroll = (dir: number) => scroller.current?.scrollBy({ left: dir * 240, behavior: "smooth" });
+  const pills = React.useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Current numeric index ("all" acts as before-the-first so Next → day 1).
+  const cur = selected === "all" ? -1 : selected;
+  const prevDisabled = cur <= 0;
+  const nextDisabled = cur >= days.length - 1;
+
+  function go(index: number) {
+    onSelect(index);
+  }
+
+  // Keep the selected pill in view when navigating.
+  React.useEffect(() => {
+    if (typeof selected === "number") {
+      pills.current[selected]?.scrollIntoView?.({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [selected]);
 
   return (
     <div className="flex items-center gap-2">
       <button
         type="button"
-        onClick={() => scroll(-1)}
-        aria-label="Scroll days left"
-        className="grid h-12 w-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 hover:bg-muted"
+        onClick={() => !prevDisabled && go(cur - 1)}
+        disabled={prevDisabled}
+        aria-label="Previous day"
+        className="grid h-12 w-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -54,6 +71,7 @@ export function DaySelector({ days, selected, onSelect }: DaySelectorProps) {
           return (
             <button
               key={i}
+              ref={(el) => { pills.current[i] = el; }}
               type="button"
               onClick={() => onSelect(i)}
               aria-pressed={sel}
@@ -76,9 +94,10 @@ export function DaySelector({ days, selected, onSelect }: DaySelectorProps) {
 
       <button
         type="button"
-        onClick={() => scroll(1)}
-        aria-label="Scroll days right"
-        className="grid h-12 w-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 hover:bg-muted"
+        onClick={() => !nextDisabled && go(cur + 1)}
+        disabled={nextDisabled}
+        aria-label="Next day"
+        className="grid h-12 w-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
       >
         <ChevronRight className="h-4 w-4" />
       </button>

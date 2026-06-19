@@ -76,6 +76,17 @@ function fmtDate(iso: string): string {
   return `${months[Number(m) - 1]} ${Number(d)}, ${y}`;
 }
 
+const DRIVER = "J. Doe · JD"; // driver name · initials (placeholder)
+
+function clock(iso: string): string {
+  const dt = new Date(iso);
+  return `${String(dt.getUTCHours()).padStart(2, "0")}:${String(dt.getUTCMinutes()).padStart(2, "0")}`;
+}
+
+function statusLabel(status: DutyStatus): string {
+  return ROWS.find((r) => r.key === status)?.label.replace(/^\d+\.\s*/, "") ?? status;
+}
+
 export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogSheetProps) {
   const points = buildPoints(day.segments, day.date);
   const remarks = day.segments
@@ -90,9 +101,10 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
   // co-driver, shipper, certification) are shown once for the whole trip in
   // <CarrierInfoCard>, not repeated on every sheet.
   const header = (
-    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-3">
+    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
       <Field label="Date">{fmtDate(day.date)}</Field>
       <Field label="Total miles driving today">{Math.round(day.driving_miles)}</Field>
+      <Field label="Driver">{DRIVER}</Field>
       <Field label="Log">Day {dayNumber} of {totalDays}</Field>
     </div>
   );
@@ -195,6 +207,33 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
           strokeLinejoin="round"
           strokeLinecap="round"
         />
+
+        {/* Invisible hover targets per segment → native tooltip with the period */}
+        {day.segments.map((s, i) => {
+          const x1 = LEFT + fracHour(s.start, day.date) * HOUR_W;
+          const x2 = LEFT + fracHour(s.end, day.date) * HOUR_W;
+          if (x2 - x1 < 0.5) return null;
+          const y = rowY(s.status);
+          const extra = s.note && s.note !== "Driving" && s.note !== "Off duty" ? ` · ${s.note}` : "";
+          const loc = s.location ? ` · ${s.location}` : "";
+          const hrs = (new Date(s.end).getTime() - new Date(s.start).getTime()) / 3_600_000;
+          return (
+            <line
+              key={`hit${i}`}
+              x1={x1}
+              y1={y}
+              x2={x2}
+              y2={y}
+              stroke="transparent"
+              strokeWidth={14}
+              style={{ pointerEvents: "stroke", cursor: "help" }}
+            >
+              <title>
+                {`${statusLabel(s.status)}  ${clock(s.start)}–${clock(s.end)}  (${fmtHrs(hrs)}h)${extra}${loc}`}
+              </title>
+            </line>
+          );
+        })}
 
         {/* Remarks */}
         <text x={10} y={TOP + GRID_H + 20} fontSize={10} fill="hsl(var(--foreground))" fontWeight={600}>
