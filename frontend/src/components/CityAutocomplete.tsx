@@ -16,11 +16,12 @@ interface CityAutocompleteProps {
   /** Fires with the picked place, or null when the user edits the text freely. */
   onSelect?: (place: Place | null) => void;
   placeholder?: string;
+  required?: boolean;
 }
 
 const PAGE = 20; // results per fetch; grows as the user scrolls
 
-export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, placeholder }: CityAutocompleteProps) {
+export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, placeholder, required }: CityAutocompleteProps) {
   const [results, setResults] = React.useState<Place[]>([]);
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -104,6 +105,7 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
       <Label htmlFor={id} className="flex items-center gap-2">
         {icon}
         {label}
+        {required && <span className="text-destructive">*</span>}
       </Label>
       <div className="relative">
         <Input

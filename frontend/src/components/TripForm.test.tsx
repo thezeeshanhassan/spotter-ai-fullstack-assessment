@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { TripForm } from "./TripForm";
@@ -43,8 +43,10 @@ describe("TripForm", () => {
     const onSubmit = vi.fn();
     render(<TripForm onSubmit={onSubmit} loading={false} />);
     fireEvent.change(screen.getByLabelText(/current/i), { target: { value: "typed text" } });
-    fireEvent.click(screen.getByRole("button", { name: /plan/i }));
+    // Button stays disabled until all three locations are picked from search.
+    const btn = screen.getByRole("button", { name: /plan/i });
+    expect(btn).toBeDisabled();
+    fireEvent.click(btn);
     expect(onSubmit).not.toHaveBeenCalled();
-    await waitFor(() => expect(screen.getByText(/from the search suggestions/i)).toBeTruthy());
   });
 });

@@ -32,9 +32,12 @@ export function TripForm({ onSubmit, loading, className }: TripFormProps) {
   const [cycle, setCycle] = React.useState("0");
   const [error, setError] = React.useState("");
 
+  // All three locations must be picked from search before the form can submit.
+  const allPicked = Boolean(currentPlace && pickupPlace && dropoffPlace);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const cycleNum = Number(cycle);
+    const cycleNum = cycle.trim() === "" ? 0 : Number(cycle); // cycle is optional → 0
 
     // Each location must be chosen from the search suggestions so we have a
     // verified place (and its coordinates) — free-typed text is rejected.
@@ -73,18 +76,18 @@ export function TripForm({ onSubmit, loading, className }: TripFormProps) {
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
-          <CityAutocomplete id="current" label="Current location" icon={ICONS.current}
+          <CityAutocomplete id="current" label="Current location" icon={ICONS.current} required
             value={current} onChange={setCurrent} onSelect={setCurrentPlace} placeholder="Search a city…" />
-          <CityAutocomplete id="pickup" label="Pickup location" icon={ICONS.pickup}
+          <CityAutocomplete id="pickup" label="Pickup location" icon={ICONS.pickup} required
             value={pickup} onChange={setPickup} onSelect={setPickupPlace} placeholder="Search a city…" />
-          <CityAutocomplete id="dropoff" label="Dropoff location" icon={ICONS.dropoff}
+          <CityAutocomplete id="dropoff" label="Dropoff location" icon={ICONS.dropoff} required
             value={dropoff} onChange={setDropoff} onSelect={setDropoffPlace} placeholder="Search a city…" />
-          <Field id="cycle" label="Cycle used (hrs)" icon={ICONS.cycle}
+          <Field id="cycle" label="Cycle used (hrs) — optional" icon={ICONS.cycle}
             value={cycle} onChange={setCycle} type="number" placeholder="0" />
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button type="submit" size="lg" className="mt-auto w-full" disabled={loading}>
+          <Button type="submit" size="lg" className="mt-auto w-full" disabled={loading || !allPicked}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" /> Planning…

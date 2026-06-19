@@ -13,7 +13,7 @@ class TripInputSerializer(serializers.Serializer):
     current_location = serializers.CharField(max_length=255)
     pickup_location = serializers.CharField(max_length=255)
     dropoff_location = serializers.CharField(max_length=255)
-    cycle_used_hrs = serializers.FloatField(min_value=0, max_value=70)
+    cycle_used_hrs = serializers.FloatField(min_value=0, max_value=70, required=False, default=0)
 
     current_lat = serializers.FloatField(required=False, allow_null=True)
     current_lng = serializers.FloatField(required=False, allow_null=True)
