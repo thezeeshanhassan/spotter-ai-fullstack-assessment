@@ -1,3 +1,5 @@
+import * as React from "react";
+
 import { Card } from "@/components/ui/card";
 import type { DayLog, DutyStatus, Segment } from "@/lib/types";
 
@@ -62,14 +64,41 @@ function fmtHrs(h: number): string {
   return (Math.round(h * 100) / 100).toFixed(2);
 }
 
+// Remarks only mark real duty-status changes (locations / activities), not the
+// continuous Driving / Off-duty padding.
+const REMARK_NOTES = new Set([
+  "Pickup", "Dropoff", "Fuel stop", "30-min break", "10-hour reset", "34-hour restart",
+]);
+
+function fmtDate(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[Number(m) - 1]} ${Number(d)}, ${y}`;
+}
+
 export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogSheetProps) {
   const points = buildPoints(day.segments, day.date);
   const remarks = day.segments
-    .filter((s) => s.location || s.note)
+    .filter((s) => REMARK_NOTES.has(s.note))
     .map((s) => ({
       x: LEFT + fracHour(s.start, day.date) * HOUR_W,
       text: s.location || s.note,
     }));
+
+  // DOT Driver's Daily Log identification block. Real data: date + driving miles.
+  // Carrier / vehicle / co-driver / shipper are placeholders (not modeled).
+  const header = (
+    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
+      <Field label="Date">{fmtDate(day.date)}</Field>
+      <Field label="Total miles driving today">{Math.round(day.driving_miles)}</Field>
+      <Field label="Truck / Trailer #">TRK-001 / TRL-001</Field>
+      <Field label="Co-driver">N/A</Field>
+      <Field label="Carrier">ELD Trip Planner Logistics</Field>
+      <Field label="Main office">Dispatch HQ</Field>
+      <Field label="Shipper / Commodity">N/A · General freight</Field>
+      <Field label="Certification">Entries true &amp; correct</Field>
+    </div>
+  );
 
   const svg = (
       <svg
@@ -199,17 +228,34 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
       </svg>
   );
 
-  if (bare) return <div className="overflow-x-auto">{svg}</div>;
+  if (bare) {
+    return (
+      <div>
+        {header}
+        <div className="overflow-x-auto">{svg}</div>
+      </div>
+    );
+  }
 
   return (
-    <Card className="overflow-x-auto p-4">
+    <Card className="p-4">
       <div className="mb-3 flex items-center justify-between px-1">
         <h3 className="text-sm font-semibold">
           Driver&apos;s Daily Log — Day {dayNumber} of {totalDays}
         </h3>
         <span className="text-xs text-muted-foreground">{day.date} · 24h (UTC)</span>
       </div>
-      {svg}
+      {header}
+      <div className="overflow-x-auto">{svg}</div>
     </Card>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] uppercase leading-normal tracking-wide text-muted-foreground">{label}</div>
+      <div className="font-medium leading-normal text-foreground [overflow-wrap:anywhere]">{children}</div>
+    </div>
   );
 }

@@ -18,6 +18,22 @@ interface CityAutocompleteProps {
   placeholder?: string;
 }
 
+// Shown on focus / for very short input. Real coords so picking one is valid.
+const POPULAR: Place[] = [
+  { label: "Atlanta, GA, USA", lat: 33.749, lng: -84.388 },
+  { label: "Boston, MA, USA", lat: 42.3601, lng: -71.0589 },
+  { label: "Chicago, IL, USA", lat: 41.8781, lng: -87.6298 },
+  { label: "Dallas, TX, USA", lat: 32.7767, lng: -96.797 },
+  { label: "Denver, CO, USA", lat: 39.7392, lng: -104.9903 },
+  { label: "Houston, TX, USA", lat: 29.7604, lng: -95.3698 },
+  { label: "Los Angeles, CA, USA", lat: 34.0522, lng: -118.2437 },
+  { label: "Miami, FL, USA", lat: 25.7617, lng: -80.1918 },
+  { label: "New York, NY, USA", lat: 40.7128, lng: -74.006 },
+  { label: "Philadelphia, PA, USA", lat: 39.9526, lng: -75.1652 },
+  { label: "Phoenix, AZ, USA", lat: 33.4484, lng: -112.074 },
+  { label: "Seattle, WA, USA", lat: 47.6062, lng: -122.3321 },
+];
+
 export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, placeholder }: CityAutocompleteProps) {
   const [results, setResults] = React.useState<Place[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -32,9 +48,13 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
       justSelected.current = false;
       return;
     }
-    if (value.trim().length < 2) {
-      setResults([]);
-      setOpen(false);
+    // For empty / 1-char input, show the popular list (filtered) instead of
+    // hitting the network.
+    const q = value.trim().toLowerCase();
+    if (q.length < 2) {
+      setResults(q ? POPULAR.filter((p) => p.label.toLowerCase().includes(q)) : POPULAR);
+      setActive(-1);
+      setLoading(false);
       return;
     }
     const ctrl = new AbortController();
@@ -101,7 +121,7 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
             onChange(e.target.value);
             onSelect?.(null); // typing invalidates any prior pick
           }}
-          onFocus={() => results.length > 0 && setOpen(true)}
+          onFocus={() => setOpen(results.length > 0)}
           onKeyDown={onKeyDown}
         />
         {loading && (
@@ -114,6 +134,11 @@ export function CityAutocomplete({ id, label, icon, value, onChange, onSelect, p
           className="glass absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg p-1 shadow-xl"
           role="listbox"
         >
+          {value.trim().length < 2 && (
+            <li className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Popular cities
+            </li>
+          )}
           {results.map((p, i) => (
             <li key={`${p.label}-${i}`} role="option" aria-selected={i === active}>
               <button

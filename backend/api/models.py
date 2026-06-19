@@ -41,6 +41,7 @@ class LogDay(models.Model):
     date = models.DateField()
     segments = models.JSONField(default=list)  # [{status, start, end, location, note}]
     totals = models.JSONField(default=dict)    # {off_duty, sleeper, driving, on_duty}
+    driving_miles = models.FloatField(default=0)  # total miles driven this day
 
     class Meta:
         ordering = ["date"]

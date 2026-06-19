@@ -133,6 +133,7 @@ def create_trip(request):
     for day in plan.days:
         LogDay.objects.create(
             trip=trip, date=day.date, totals=day.totals,
+            driving_miles=round(day.driving_miles, 1),
             segments=[
                 {
                     "status": s.status,

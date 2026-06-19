@@ -22,7 +22,7 @@ describe("TripDashboard", () => {
       current_location: "A", pickup_location: "B", dropoff_location: "C", cycle_used_hrs: 0,
       route: { distance_miles: 220, duration_hours: 4, geometry: [] },
       stops: [],
-      days: [{ date: "2026-01-01", segments: [], totals: { off_duty: 24, sleeper: 0, driving: 0, on_duty: 0 } }],
+      days: [{ date: "2026-01-01", segments: [], totals: { off_duty: 24, sleeper: 0, driving: 0, on_duty: 0 }, driving_miles: 0 }],
       violations: [],
       created_at: "",
     });
