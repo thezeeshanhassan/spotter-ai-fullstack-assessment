@@ -82,7 +82,7 @@ export function TripForm({ onSubmit, loading, className }: TripFormProps) {
             value={pickup} onChange={setPickup} onSelect={setPickupPlace} placeholder="Search a city…" />
           <CityAutocomplete id="dropoff" label="Dropoff location" icon={ICONS.dropoff} required
             value={dropoff} onChange={setDropoff} onSelect={setDropoffPlace} placeholder="Search a city…" />
-          <Field id="cycle" label="Cycle used (hrs) — optional" icon={ICONS.cycle}
+          <Field id="cycle" label="Cycle used (hrs)" icon={ICONS.cycle}
             value={cycle} onChange={setCycle} type="number" placeholder="0" />
 
           {error && <p className="text-sm text-destructive">{error}</p>}
