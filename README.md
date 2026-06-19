@@ -7,9 +7,9 @@ assessment.
 > **Inputs:** current location · pickup location · dropoff location · current cycle used (hrs)
 > **Outputs:** an interactive route map (stops, rests, fuel) + one drawn DOT daily log sheet per day.
 
-- **Live demo:** _TODO — add Vercel URL after deploy_
-- **API:** _TODO — add Render URL after deploy_
-- **Loom walkthrough:** _TODO — add Loom link_
+- **Live demo:** _add your Vercel URL here_
+- **API:** https://16.170.244.106.nip.io (AWS EC2 · Docker · Caddy auto-HTTPS)
+- **Loom walkthrough:** _add Loom link_
 
 ---
 
@@ -18,7 +18,7 @@ assessment.
 | Layer | Stack |
 |-------|-------|
 | Frontend | Vite + React + TypeScript + Tailwind + shadcn-style UI → Vercel |
-| Backend | Django 5.2 + Django REST Framework + SQLite → Render |
+| Backend | Django 5.2 + Django REST Framework + SQLite → AWS EC2 (Docker + Caddy) |
 | Map | Leaflet + OpenStreetMap (Carto dark tiles) |
 | Geocoding + routing | OpenRouteService (free API key, backend-only) |
 | Logs | React SVG (interactive), PDF export via jsPDF + html2canvas |
@@ -85,7 +85,7 @@ npm run build                 # production build
 
 | Var | Purpose |
 |-----|---------|
-| `VITE_API_BASE_URL` | backend base URL (Render URL in prod) |
+| `VITE_API_BASE_URL` | backend base URL (e.g. https://16.170.244.106.nip.io in prod) |
 
 ## API
 
@@ -97,18 +97,16 @@ npm run build                 # production build
 
 ## Deployment
 
-**Backend → Render**
+Production runs **always-on** (no cold starts): the backend on AWS EC2 in Docker
+behind Caddy (automatic HTTPS), the frontend on Vercel.
 
-1. New **Web Service** from this repo (or use `render.yaml` as a Blueprint).
-2. Root dir `backend`, build `./build.sh`, start `gunicorn config.wsgi:application`.
-3. Set env vars: `ORS_API_KEY`, `CORS_ALLOWED_ORIGINS` (your Vercel URL),
-   `CSRF_TRUSTED_ORIGINS`. `DJANGO_DEBUG=False`, `DJANGO_ALLOWED_HOSTS=.onrender.com`.
+- **Backend → AWS EC2 + Docker:** full guide in [docs/DEPLOY-AWS.md](docs/DEPLOY-AWS.md)
+  (`docker compose up -d --build`; Caddy issues HTTPS via Let's Encrypt; SQLite on a
+  persistent volume). Live: https://16.170.244.106.nip.io
+- **Frontend → Vercel:** full guide in [docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md)
+  (root dir `frontend`, env `VITE_API_BASE_URL` = the backend URL).
 
-**Frontend → Vercel**
-
-1. Import the repo, set **root directory** to `frontend` (framework auto-detected: Vite).
-2. Env var `VITE_API_BASE_URL` = your Render backend URL.
-3. Deploy. `vercel.json` handles SPA routing.
+A `render.yaml` is also included if you prefer Render (note: free tier cold-starts).
 
 ## HOS rules
 
