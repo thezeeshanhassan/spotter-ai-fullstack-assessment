@@ -1,6 +1,7 @@
 import { Clock, Download, Gauge, Moon, Route, Sun, Truck } from "lucide-react";
 import * as React from "react";
 
+import { CarrierInfoCard } from "@/components/CarrierInfoCard";
 import { DaySelector, type DaySelection } from "@/components/DaySelector";
 import { EldLogSheet } from "@/components/EldLogSheet";
 import { RouteMap } from "@/components/RouteMap";
@@ -143,6 +144,10 @@ export function TripDashboard() {
           <ViolationBanner violations={result.violations} />
 
           <div className="mt-3">
+            <CarrierInfoCard />
+          </div>
+
+          <div className="mt-3">
             <DaySelector days={result.days} selected={daySel} onSelect={setDaySel} />
           </div>
 
@@ -165,7 +170,9 @@ export function TripDashboard() {
             ref={logsRef}
             aria-hidden
             style={{ position: "absolute", left: -10000, top: 0, width: 840 }}
+            className="space-y-4"
           >
+            <CarrierInfoCard />
             {result.days.map((day, i) => (
               <EldLogSheet key={i} day={day} dayNumber={i + 1} totalDays={result.days.length} />
             ))}

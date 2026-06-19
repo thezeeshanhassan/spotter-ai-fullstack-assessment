@@ -85,18 +85,14 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
       text: s.location || s.note,
     }));
 
-  // DOT Driver's Daily Log identification block. Real data: date + driving miles.
-  // Carrier / vehicle / co-driver / shipper are placeholders (not modeled).
+  // Per-day fields only. The fixed identification fields (carrier, vehicle,
+  // co-driver, shipper, certification) are shown once for the whole trip in
+  // <CarrierInfoCard>, not repeated on every sheet.
   const header = (
-    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
+    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-3">
       <Field label="Date">{fmtDate(day.date)}</Field>
       <Field label="Total miles driving today">{Math.round(day.driving_miles)}</Field>
-      <Field label="Truck / Trailer #">TRK-001 / TRL-001</Field>
-      <Field label="Co-driver">N/A</Field>
-      <Field label="Carrier">ELD Trip Planner Logistics</Field>
-      <Field label="Main office">Dispatch HQ</Field>
-      <Field label="Shipper / Commodity">N/A · General freight</Field>
-      <Field label="Certification">Entries true &amp; correct</Field>
+      <Field label="Log">Day {dayNumber} of {totalDays}</Field>
     </div>
   );
 
