@@ -4,12 +4,14 @@ Full-stack app that turns trip details into a **route map with required stops/re
 and **filled-out FMCSA daily log sheets (ELD)**. Built for the Spotter AI full-stack
 assessment.
 
-> **Inputs:** current location · pickup location · dropoff location · current cycle used (hrs)
+> **Inputs:** current location · pickup location · dropoff location · cycle used (optional, hrs)
 > **Outputs:** an interactive route map (stops, rests, fuel) + one drawn DOT daily log sheet per day.
 
 - **Live demo:** https://spotter-ai-fullstack-assessment.vercel.app
-- **API:** https://16.170.244.106.nip.io (AWS EC2 · Docker · Caddy auto-HTTPS)
+- **API:** https://16.170.244.106.nip.io
 - **Loom walkthrough:** _add Loom link_
+
+Full design, architecture, and deployment guide: **[docs/DESIGN.md](docs/DESIGN.md)**
 
 ---
 
@@ -17,33 +19,36 @@ assessment.
 
 | Layer | Stack |
 |-------|-------|
-| Frontend | Vite + React + TypeScript + Tailwind + shadcn-style UI → Vercel |
-| Backend | Django 5.2 + Django REST Framework + SQLite → AWS EC2 (Docker + Caddy) |
-| Map | Leaflet + OpenStreetMap (Carto dark tiles) |
+| Frontend | Vite + React + TypeScript + Tailwind + shadcn-style UI → **Vercel** |
+| Backend | Django 5.2 + Django REST Framework + SQLite → **AWS EC2** (Docker + Caddy) |
+| Map | Leaflet + OpenStreetMap (Carto tiles) |
 | Geocoding + routing | OpenRouteService (free API key, backend-only) |
 | Logs | React SVG (interactive), PDF export via jsPDF + html2canvas |
 
 ## Features
 
-- FMCSA property-carrying **Hours-of-Service engine** (pure, unit-tested): 11h driving
-  limit, 14h window, 30-min break after 8h, 10h reset, 70h/8-day cycle, auto **34-hour
-  restart**, 1h pickup/dropoff, fuel every 1,000 mi.
-- **Animated route playback** — a truck drives the route with a live driving clock + miles.
+- FMCSA property-carrying **Hours-of-Service engine** (pure, unit-tested): 11 h driving
+  limit, 14 h window, 30-min break after 8 h, 10 h reset, 70 h/8-day cycle, auto **34-hour
+  restart**, 1 h pickup/dropoff, fuel every 1,000 mi.
+- **Live city search** — pick locations from autocomplete (coordinates sent to backend).
+- **Required location fields** (marked with `*`) — submit disabled until all three are picked.
+- **Optional cycle used** — defaults to 0 (fresh driver).
+- **Animated route playback** — truck drives the route with a live driving clock + miles.
 - **Live HOS violation warnings** with suggested fixes.
 - **Drawn DOT log sheets**, one per day, with duty-status line, per-status totals, remarks.
-- **Export to PDF.** Dark glassmorphism UI, fully responsive.
+- **Export to PDF.** Dark/light theme, fully responsive.
 
 ## Project layout
 
 ```
-backend/    Django: config/ (project), api/ (DRF + ORS client), hos/ (pure HOS engine), tests/
-frontend/   Vite React app: components/, lib/ (api + types), ui/ primitives
-docs/       design spec + implementation plan (docs/superpowers/)
-render.yaml Render blueprint for the backend
-PROGRESS.md per-task build log
+backend/           Django: config/, api/, hos/ (pure HOS engine), tests/
+frontend/          Vite React app: components/, lib/, ui/
+docs/              DESIGN.md (architecture + deploy), HOURS-OF-SERVICE.md, 
+docker-compose.yml Production backend (Gunicorn + Caddy on EC2)
+Caddyfile          HTTPS hostname for the backend
 ```
 
-## Local setup
+## Quick start (local)
 
 ### Backend
 
@@ -51,10 +56,10 @@ PROGRESS.md per-task build log
 cd backend
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # then put your ORS key in .env
+cp .env.example .env          # add ORS_API_KEY (OpenRouteService)
 python manage.py migrate
 python manage.py runserver    # http://localhost:8000
-pytest                        # run the test suite
+pytest                        # 17 tests
 ```
 
 ### Frontend
@@ -64,55 +69,38 @@ cd frontend
 npm install
 cp .env.example .env          # VITE_API_BASE_URL=http://localhost:8000
 npm run dev                   # http://localhost:5173
-npm run test                  # vitest
+npx vitest run                # 7 tests
 npm run build                 # production build
 ```
 
 ## Environment variables
 
-**Backend (`backend/.env`)**
+See **[docs/DESIGN.md §8](docs/DESIGN.md#8-configuration--secrets)** for full details.
 
-| Var | Purpose |
-|-----|---------|
-| `DJANGO_SECRET_KEY` | Django secret |
-| `DJANGO_DEBUG` | `True` locally, `False` in prod |
-| `DJANGO_ALLOWED_HOSTS` | comma-separated hosts (`.onrender.com`) |
-| `CORS_ALLOWED_ORIGINS` | frontend origin(s), e.g. your Vercel URL |
-| `CSRF_TRUSTED_ORIGINS` | https origins for admin (optional) |
-| `ORS_API_KEY` | OpenRouteService key ([free signup](https://openrouteservice.org/dev/#/signup)) |
+**Backend (`backend/.env`):** `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`,
+`CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`, `ORS_API_KEY`
 
-**Frontend (`frontend/.env`)**
-
-| Var | Purpose |
-|-----|---------|
-| `VITE_API_BASE_URL` | backend base URL (e.g. https://16.170.244.106.nip.io in prod) |
+**Frontend (`frontend/.env`):** `VITE_API_BASE_URL`
 
 ## API
 
 | Method | Path | Body / result |
 |--------|------|---------------|
 | `GET` | `/api/health/` | `{"status":"ok"}` |
-| `POST` | `/api/trips/` | `{current_location, pickup_location, dropoff_location, cycle_used_hrs}` → `{id, route, stops, days, violations}` |
-| `GET` | `/api/trips/<id>/` | same shape (reloads a saved trip) |
+| `GET` | `/api/geocode/?q=` | City autocomplete (proxies OpenRouteService) |
+| `POST` | `/api/trips/` | `{current_location, pickup_location, dropoff_location, cycle_used_hrs?, lat/lng…}` → `{id, route, stops, days, violations}` |
+| `GET` | `/api/trips/<id>/` | Same shape (reloads a saved trip) |
 
 ## Deployment
 
-Production runs **always-on** (no cold starts): the backend on AWS EC2 in Docker
-behind Caddy (automatic HTTPS), the frontend on Vercel.
+Production: **Vercel** (frontend) + **AWS EC2** (backend in Docker behind Caddy with automatic HTTPS). No cold starts.
 
-- **Backend → AWS EC2 + Docker:** full guide in [docs/DEPLOY-AWS.md](docs/DEPLOY-AWS.md)
-  (`docker compose up -d --build`; Caddy issues HTTPS via Let's Encrypt; SQLite on a
-  persistent volume). Live: https://16.170.244.106.nip.io
-- **Frontend → Vercel:** full guide in [docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md)
-  (root dir `frontend`, env `VITE_API_BASE_URL` = the backend URL).
-
-A `render.yaml` is also included if you prefer Render (note: free tier cold-starts).
+Step-by-step instructions: **[docs/DESIGN.md §9](docs/DESIGN.md#9-deployment)**
 
 ## HOS rules
 
 The HOS engine implements the FMCSA *Interstate Truck Driver's Guide to Hours of Service*
-for property carriers (70hr/8day). Assumptions per the brief: no adverse-driving or
-short-haul exceptions, fuel at least every 1,000 miles, 1h pickup + 1h dropoff.
+for property carriers (70 hr / 8 day). Domain reference: **[docs/HOURS-OF-SERVICE.md](docs/HOURS-OF-SERVICE.md)**
 
 ```
 backend/hos/rules.py     constants

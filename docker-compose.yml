@@ -1,6 +1,6 @@
 # Production compose for the backend on AWS EC2.
 # Caddy terminates HTTPS (auto Let's Encrypt) and reverse-proxies to gunicorn.
-# Requires a domain pointed at the EC2 public IP (see docs/DEPLOY-AWS.md).
+# Requires a hostname pointed at the EC2 public IP (see docs/DESIGN.md §9).
 
 services:
   backend:
