@@ -138,6 +138,8 @@ components/
   DaySelector.tsx    horizontal day picker (date over index) + All
   ViolationBanner.tsx
   TripDashboard.tsx  orchestrates the two sections
+  AboutPage.tsx      rules, policies, limitations (/about)
+  AppLayout.tsx      shared header, nav, theme toggle
 vercel.json     SPA routing for Vercel
 ```
 
@@ -179,6 +181,25 @@ vercel.json     SPA routing for Vercel
   row is shown but zero.
 - **AWS EC2 over serverless backend** — always-on API, no cold-start delay on
   first trip plan after idle.
+
+### Route length cap (OpenRouteService)
+
+OpenRouteService enforces a **~6,000 km (~3,700 mile)** limit on a single routing
+request (server configuration). When a current → pickup → dropoff path exceeds
+that approximation, ORS returns an error and the API responds with **422** and a
+friendly message:
+
+> *This route is too long to plan (over ~3,700 miles / 6,000 km). Pick locations that are closer together.*
+
+This is **not** an app bug — it is an upstream routing limit. In practice:
+
+| Typical outcome | Distance |
+|-----------------|----------|
+| Most US trips | Well under the cap |
+| Long hauls that work | ~4,300–4,600 mi (e.g. San Diego → Vancouver → Boston) |
+| Ultra-long zigzags | Often fail (e.g. coast-to-coast-to-coast in one request) |
+
+The About page (`/about`) documents this for users alongside other limitations.
 
 ---
 

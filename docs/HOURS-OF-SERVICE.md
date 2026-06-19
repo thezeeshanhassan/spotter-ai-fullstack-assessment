@@ -188,8 +188,9 @@ curl -s -X POST http://localhost:8000/api/trips/ -H "Content-Type: application/j
 - **Sleeper-berth split** is not modeled — rest is logged as Off Duty.
 - **Adverse-driving** and **short-haul** exceptions are intentionally out of scope
   (per the assessment assumptions).
-- OpenRouteService caps a single route at ~3,700 mi (6,000 km) for some profiles;
-  genuinely longer single routes return a clear "route too long" message.
+- OpenRouteService caps a single route at **~6,000 km / ~3,700 mi** (ORS server
+  limit). Longer paths return HTTP **422** with a “route too long” message — see
+  `backend/api/views.py → _friendly_error()`.
 - The 70h cycle is modeled as a running on-duty total seeded by the input rather
   than a literal day-by-day rolling 8-day array — sufficient for single-trip
   planning and matches the "can't drive past 70h" behavior.

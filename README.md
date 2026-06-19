@@ -37,6 +37,7 @@ Full design, architecture, and deployment guide: **[docs/DESIGN.md](docs/DESIGN.
 - **Live HOS violation warnings** with suggested fixes.
 - **Drawn DOT log sheets**, one per day, with duty-status line, per-status totals, remarks.
 - **Export to PDF.** Dark/light theme, fully responsive.
+- **About page** (`/about`) — HOS rules, policies, and limitations (including route length cap).
 
 ## Project layout
 

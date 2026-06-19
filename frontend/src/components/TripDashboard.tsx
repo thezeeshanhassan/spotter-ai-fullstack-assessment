@@ -1,4 +1,4 @@
-import { Clock, Download, Gauge, Moon, Route, Sun, Truck } from "lucide-react";
+import { Clock, Download, Gauge, Route } from "lucide-react";
 import * as React from "react";
 
 import { CarrierInfoCard } from "@/components/CarrierInfoCard";
@@ -10,7 +10,7 @@ import { ViolationBanner } from "@/components/ViolationBanner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createTrip } from "@/lib/api";
-import { toggleTheme, useTheme } from "@/lib/theme";
+import { useTheme } from "@/lib/theme";
 import type { TripInput, TripResult } from "@/lib/types";
 
 export function TripDashboard() {
@@ -68,29 +68,7 @@ export function TripDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-8 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/20 text-primary">
-          <Truck className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">ELD Trip Planner</h1>
-          <p className="text-sm text-muted-foreground">
-            Route, stops &amp; FMCSA-compliant daily log sheets
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="ml-auto"
-          onClick={toggleTheme}
-          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-        >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-      </header>
-
+    <>
       {/* SECTION 1 — Trip input + route map */}
       <section className="mb-10">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -179,7 +157,7 @@ export function TripDashboard() {
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }
 
