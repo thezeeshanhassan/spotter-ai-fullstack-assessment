@@ -28,24 +28,35 @@ function dotIcon(color: string) {
   });
 }
 
-const truckIcon = L.divIcon({
-  className: "",
-  html: `<span style="font-size:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))">🚚</span>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
+// The 🚚 glyph faces LEFT by default; flip it horizontally to point toward the
+// direction of travel (toward pickup, then dropoff).
+function truckIcon(faceRight: boolean) {
+  return L.divIcon({
+    className: "",
+    html: `<span style="display:inline-block;font-size:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));transform:scaleX(${faceRight ? -1 : 1})">🚚</span>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+}
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-function pointAt(geometry: [number, number][], progress: number): [number, number] {
-  if (geometry.length === 0) return [0, 0];
-  if (geometry.length === 1) return geometry[0];
-  const pos = progress * (geometry.length - 1);
-  const i = Math.min(geometry.length - 2, Math.floor(pos));
-  const frac = pos - i;
-  return [lerp(geometry[i][0], geometry[i + 1][0], frac), lerp(geometry[i][1], geometry[i + 1][1], frac)];
+/** Position + facing of the truck at a given progress (0..1) along the route. */
+function truckAt(geometry: [number, number][], progress: number): { pos: [number, number]; faceRight: boolean } {
+  if (geometry.length === 0) return { pos: [0, 0], faceRight: true };
+  if (geometry.length === 1) return { pos: geometry[0], faceRight: true };
+  const span = progress * (geometry.length - 1);
+  const i = Math.min(geometry.length - 2, Math.floor(span));
+  const frac = span - i;
+  const pos: [number, number] = [
+    lerp(geometry[i][0], geometry[i + 1][0], frac),
+    lerp(geometry[i][1], geometry[i + 1][1], frac),
+  ];
+  // Heading east (increasing longitude) → face right.
+  const faceRight = geometry[i + 1][1] >= geometry[i][1];
+  return { pos, faceRight };
 }
 
 function FitBounds({ geometry }: { geometry: [number, number][] }) {
@@ -104,7 +115,7 @@ export function RouteMap({ result }: { result: TripResult }) {
     setPlaying((p) => !p);
   }
 
-  const truckPos = pointAt(geometry, progress);
+  const truck = truckAt(geometry, progress);
   const elapsedHours = progress * result.route.duration_hours;
   const elapsedMiles = progress * result.route.distance_miles;
   const center = geometry[0] ?? [39.5, -98.35];
@@ -130,7 +141,9 @@ export function RouteMap({ result }: { result: TripResult }) {
               </Popup>
             </Marker>
           ))}
-        {geometry.length > 0 && <Marker position={truckPos as L.LatLngExpression} icon={truckIcon} />}
+        {geometry.length > 0 && (
+          <Marker position={truck.pos as L.LatLngExpression} icon={truckIcon(truck.faceRight)} />
+        )}
       </MapContainer>
 
       {/* Playback overlay */}
