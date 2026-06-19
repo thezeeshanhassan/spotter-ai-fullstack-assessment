@@ -88,7 +88,7 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
   // DOT Driver's Daily Log identification block. Real data: date + driving miles.
   // Carrier / vehicle / co-driver / shipper are placeholders (not modeled).
   const header = (
-    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
+    <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
       <Field label="Date">{fmtDate(day.date)}</Field>
       <Field label="Total miles driving today">{Math.round(day.driving_miles)}</Field>
       <Field label="Truck / Trailer #">TRK-001 / TRL-001</Field>
@@ -96,7 +96,7 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
       <Field label="Carrier">ELD Trip Planner Logistics</Field>
       <Field label="Main office">Dispatch HQ</Field>
       <Field label="Shipper / Commodity">N/A · General freight</Field>
-      <Field label="Driver">I certify these entries are true and correct</Field>
+      <Field label="Certification">Entries true &amp; correct</Field>
     </div>
   );
 
@@ -254,8 +254,8 @@ export function EldLogSheet({ day, dayNumber, totalDays, bare = false }: EldLogS
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="truncate font-medium text-foreground">{children}</div>
+      <div className="text-[10px] uppercase leading-normal tracking-wide text-muted-foreground">{label}</div>
+      <div className="font-medium leading-normal text-foreground [overflow-wrap:anywhere]">{children}</div>
     </div>
   );
 }
