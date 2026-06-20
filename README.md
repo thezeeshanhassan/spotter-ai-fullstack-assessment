@@ -37,6 +37,7 @@ Full design, architecture, and deployment guide: **[docs/DESIGN.md](docs/DESIGN.
 - **Live HOS violation warnings** with suggested fixes.
 - **Drawn DOT log sheets**, one per day, with duty-status line, per-status totals, remarks.
 - **Export to PDF.** Dark/light theme, fully responsive.
+- **First-visit welcome modal** — quick overview with a link to the full About page (re-openable from About).
 - **About page** (`/about`) — HOS rules, policies, and limitations (including route length cap).
 - **Developer page** (`/developer`) — short author bio, email & repo links (edit `frontend/src/lib/developer.ts`).
 

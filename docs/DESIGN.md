@@ -128,14 +128,17 @@ lib/
   api.ts        createTrip / getTrip / suggestPlaces
   types.ts      shared types mirroring the API JSON
   theme.ts      dark/light store (localStorage + useSyncExternalStore)
+  router.ts     minimal client router (home / about / developer)
+  developer.ts  Developer-page content (edit here)
   utils.ts      cn() class merge
 components/
   ui/           button / card / input / label (shadcn-style, cva)
+  WelcomeModal.tsx   first-visit overview (links to About)
   TripForm.tsx       locations (required) + optional cycle; submit gating
-  CityAutocomplete.tsx  debounced search + popular-cities-on-focus
+  CityAutocomplete.tsx  debounced live search, load-more on scroll, no-results state
   RouteMap.tsx       Leaflet map, stops, animated truck playback
   EldLogSheet.tsx    DOT log: identification header + SVG grid (one per day)
-  DaySelector.tsx    horizontal day picker (date over index) + All
+  DaySelector.tsx    day picker (prev/next + All), hover tooltips on the duty line
   ViolationBanner.tsx
   TripDashboard.tsx  orchestrates the two sections
   AboutPage.tsx      rules, policies, limitations (/about)

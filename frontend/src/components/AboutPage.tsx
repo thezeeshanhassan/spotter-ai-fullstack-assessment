@@ -1,6 +1,7 @@
-import { AlertTriangle, BookOpen, MapPin, Scale, ShieldAlert } from "lucide-react";
+import { AlertTriangle, BookOpen, MapPin, RotateCcw, Scale, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const bold = "font-semibold text-foreground";
@@ -230,6 +231,20 @@ export function AboutPage() {
           ))}
         </CardContent>
       </Card>
+
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            localStorage.removeItem("eld-welcome-seen");
+            window.location.href = "/";
+          }}
+        >
+          <RotateCcw className="h-4 w-4" />
+          Replay the welcome overview
+        </Button>
+      </div>
 
       <p className="text-center text-xs text-muted-foreground">
         Source: FMCSA Interstate Truck Driver&apos;s Guide to Hours of Service (49 CFR Part 395).
